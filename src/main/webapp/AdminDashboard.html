@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | SmartCampus - Egerton University</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --egerton-green: #00A651;
+            --egerton-green-dark: #008a43;
+            --egerton-green-deep: #007624;
+            --egerton-gold: #D2AC67;
+            --bg-light: #F8F9FC;
+            --card-white: #ffffff;
+            --text-dark: #1F2A3A;
+            --text-muted: #5a6e8a;
+            --border-color: #e9ecef;
+            --sidebar-bg: #1a472a;
+            --sidebar-hover: #2a5a3a;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--egerton-green-deep) 100%);
+            min-height: 100vh;
+            color: white;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-brand h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-brand p {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            margin-bottom: 0;
+        }
+
+        .nav-link-custom {
+            color: rgba(255,255,255,0.85);
+            padding: 0.7rem 1.2rem;
+            margin: 0.2rem 0.8rem;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .nav-link-custom:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link-custom.active {
+            background: var(--egerton-gold);
+            color: var(--egerton-green-deep);
+            font-weight: 600;
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 1.5rem 2rem;
+        }
+
+        /* Header */
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .page-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-bottom: 0;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(0,166,81,0.1), rgba(210,172,103,0.1));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .stat-icon i {
+            font-size: 1.8rem;
+            color: var(--egerton-green);
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 0;
+        }
+
+        .stat-card p {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+
+        /* Tables */
+        .table-container {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-container h5 {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .table-custom {
+            margin-bottom: 0;
+        }
+
+        .table-custom thead {
+            background: #F8F9FC;
+        }
+
+        .table-custom th {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+            padding: 0.8rem;
+        }
+
+        .table-custom td {
+            font-size: 0.85rem;
+            padding: 0.8rem;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .badge-lecturer {
+            background: linear-gradient(135deg, #00A65120, #D2AC6720);
+            color: var(--egerton-green-dark);
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .badge-janitor {
+            background: #e8f0fe;
+            color: #2c6e9e;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .badge-admin {
+            background: #ffe6e6;
+            color: #b33;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .btn-add {
+            background: var(--egerton-green);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-add:hover {
+            background: var(--egerton-green-dark);
+            transform: translateY(-2px);
+            color: white;
+        }
+
+        /* User Section */
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--egerton-green), var(--egerton-gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+                position: static;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+            .stat-card h3 {
+                font-size: 1.4rem;
+            }
+        }
+
+        /* Modal Styles */
+        .modal-custom .modal-content {
+            border-radius: 24px;
+            border: none;
+        }
+
+        .modal-custom .modal-header {
+            background: linear-gradient(135deg, var(--egerton-green-dark), var(--egerton-green));
+            color: white;
+            border-radius: 24px 24px 0 0;
+            border: none;
+        }
+
+        .modal-custom .btn-primary {
+            background: var(--egerton-green);
+            border: none;
+            border-radius: 40px;
+            padding: 8px 24px;
+        }
+
+        .modal-custom .btn-primary:hover {
+            background: var(--egerton-green-dark);
+        }
+
+        /* Toast Animation */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .custom-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 9999;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid px-0">
+    <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="sidebar-brand">
+                <h3>SmartCampus</h3>
+                <p>Egerton University</p>
+            </div>
+            <nav class="nav flex-column">
+                <a class="nav-link-custom active" data-section="dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link-custom" data-section="offices">
+                    <i class="bi bi-building"></i> Offices
+                </a>
+                <a class="nav-link-custom" data-section="users">
+                    <i class="bi bi-people"></i> Users
+                </a>
+                <hr class="mx-3 my-3" style="border-color: rgba(255,255,255,0.2);">
+                <a href="index.html" class="nav-link-custom">
+                    <i class="bi bi-box-arrow-left"></i> Sign Out
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <div class="page-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Science Complex Management Overview</p>
+                </div>
+                <div>
+                    <span class="badge bg-light text-dark p-2 shadow-sm">
+                        <i class="bi bi-person-circle"></i> Dr. James Mwangi | admin@egerton.ac.ke
+                    </span>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboardSection">
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-door-closed"></i>
+                            </div>
+                            <h3>8</h3>
+                            <p>Total Offices</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <h3>9</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-check2-circle"></i>
+                            </div>
+                            <h3>2</h3>
+                            <p>Completed Today</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-6">
+                        <div class="stat-card">
+                            <div class="stat-icon">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                            <h3>4</h3>
+                            <p>Pending Tasks</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Offices Table -->
+                <div class="table-container">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <h5><i class="bi bi-building text-success"></i> Offices</h5>
+                        <button class="btn-add" onclick="openAddOfficeModal()">
+                            <i class="bi bi-plus-lg"></i> Add Office
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Office</th>
+                                    <th>Wing</th>
+                                    <th>Floor</th>
+                                    <th>Lecturer</th>
+                                    <th>Janitor</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="officesTableBody">
+                                <!-- Office data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Section (Hidden by default) -->
+            <div id="usersSection" style="display: none;">
+                <div class="table-container">
+                    <h5><i class="bi bi-people text-success"></i> Users Management</h5>
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Gender</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                                <!-- User data will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Office Modal -->
+<div class="modal fade modal-custom" id="addOfficeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Add New Office</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addOfficeForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Office Number</label>
+                        <input type="text" class="form-control" id="officeNumber" placeholder="e.g., A101, B202" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Wing</label>
+                        <select class="form-select" id="officeWing" required>
+                            <option value="A">A Wing</option>
+                            <option value="B">B Wing</option>
+                            <option value="C">C Wing</option>
+                            <option value="D">D Wing</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Floor</label>
+                        <input type="number" class="form-control" id="officeFloor" placeholder="1" min="1" max="5" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Assigned Lecturer</label>
+                        <select class="form-select" id="officeLecturer">
+                            <option value="—">-- Select Lecturer --</option>
+                            <option value="Prof. Sarah Wanjiku">Prof. Sarah Wanjiku</option>
+                            <option value="Dr. Peter Ochieng">Dr. Peter Ochieng</option>
+                            <option value="Dr. Grace Akinyi">Dr. Grace Akinyi</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Assigned Janitor</label>
+                        <select class="form-select" id="officeJanitor">
+                            <option value="—">-- Select Janitor --</option>
+                            <option value="John Kamau">John Kamau</option>
+                            <option value="Mary Njeri">Mary Njeri</option>
+                            <option value="David Kiprop">David Kiprop</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addOffice()">Add Office</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Office Modal -->
+<div class="modal fade modal-custom" id="editOfficeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Edit Office</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editOfficeForm">
+                    <input type="hidden" id="editOfficeId">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Office Number</label>
+                        <input type="text" class="form-control" id="editOfficeNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Wing</label>
+                        <select class="form-select" id="editOfficeWing" required>
+                            <option value="A">A Wing</option>
+                            <option value="B">B Wing</option>
+                            <option value="C">C Wing</option>
+                            <option value="D">D Wing</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Floor</label>
+                        <input type="number" class="form-control" id="editOfficeFloor" min="1" max="5" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Assigned Lecturer</label>
+                        <select class="form-select" id="editOfficeLecturer">
+                            <option value="—">—</option>
+                            <option value="Prof. Sarah Wanjiku">Prof. Sarah Wanjiku</option>
+                            <option value="Dr. Peter Ochieng">Dr. Peter Ochieng</option>
+                            <option value="Dr. Grace Akinyi">Dr. Grace Akinyi</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Assigned Janitor</label>
+                        <select class="form-select" id="editOfficeJanitor">
+                            <option value="—">—</option>
+                            <option value="John Kamau">John Kamau</option>
+                            <option value="Mary Njeri">Mary Njeri</option>
+                            <option value="David Kiprop">David Kiprop</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="updateOffice()">Update Office</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ============= DATA (Matches your images exactly) =============
+    let offices = [
+        { id: 1, office: "A101", wing: "A", floor: 1, lecturer: "Prof. Sarah Wanjiku", janitor: "John Kamau" },
+        { id: 2, office: "A201", wing: "A", floor: 2, lecturer: "Dr. Peter Ochieng", janitor: "Mary Njeri" },
+        { id: 3, office: "B101", wing: "B", floor: 1, lecturer: "Dr. Grace Akinyi", janitor: "David Kiprop" },
+        { id: 4, office: "B102", wing: "B", floor: 1, lecturer: "—", janitor: "David Kiprop" }
+    ];
+
+    let users = [
+        { name: "Dr. James Mwangi", email: "admin@egerton.ac.ke", role: "Admin", gender: "Male" },
+        { name: "Prof. Sarah Wanjiku", email: "swanjiku@egerton.ac.ke", role: "Lecturer", gender: "Female" },
+        { name: "Dr. Peter Ochieng", email: "pocheing@egerton.ac.ke", role: "Lecturer", gender: "Male" },
+        { name: "Dr. Grace Akinyi", email: "gakinyi@egerton.ac.ke", role: "Lecturer", gender: "Female" },
+        { name: "John Kamau", email: "jkamau@egerton.ac.ke", role: "Janitor", gender: "Male" },
+        { name: "Mary Njeri", email: "mnjeri@egerton.ac.ke", role: "Janitor", gender: "Female" },
+        { name: "David Kiprop", email: "dkiprop@egerton.ac.ke", role: "Janitor", gender: "Male" },
+        { name: "Michael Chebet", email: "mchebet@egerton.ac.ke", role: "Supervisor", gender: "Male" }
+    ];
+
+    // ============= UTILITY FUNCTIONS =============
+    function showToast(message, type = 'success') {
+        const toastDiv = document.createElement('div');
+        toastDiv.className = 'custom-toast';
+        toastDiv.style.backgroundColor = type === 'success' ? '#00A651' : (type === 'error' ? '#dc3545' : '#17a2b8');
+        toastDiv.style.color = 'white';
+        
+        let icon = '';
+        if (type === 'success') icon = '<i class="bi bi-check-circle-fill"></i>';
+        else if (type === 'error') icon = '<i class="bi bi-exclamation-triangle-fill"></i>';
+        else icon = '<i class="bi bi-info-circle-fill"></i>';
+        
+        toastDiv.innerHTML = `${icon}<span>${message}</span>`;
+        document.body.appendChild(toastDiv);
+        
+        setTimeout(() => {
+            toastDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toastDiv.remove(), 300);
+        }, 2500);
+        
+        toastDiv.onclick = () => {
+            toastDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toastDiv.remove(), 300);
+        };
+    }
+
+    // ============= RENDER FUNCTIONS =============
+    function renderOffices() {
+        const tbody = document.getElementById('officesTableBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        offices.forEach(office => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${office.office}</strong></td>
+                <td><span class="badge bg-secondary bg-opacity-10 text-dark">${office.wing} Wing</span></td>
+                <td>Floor ${office.floor}</td>
+                <td><span class="badge-lecturer"><i class="bi bi-person-video3"></i> ${office.lecturer}</span></td>
+                <td><span class="badge-janitor"><i class="bi bi-brush"></i> ${office.janitor}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-success me-1" onclick="editOffice(${office.id})" style="border-radius: 20px;">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteOffice(${office.id})" style="border-radius: 20px;">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        // Update stats
+        document.querySelector('.stat-card:first-child h3').textContent = offices.length;
+    }
+
+    function renderUsers() {
+        const tbody = document.getElementById('usersTableBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        users.forEach(user => {
+            let roleClass = user.role === 'Admin' ? 'badge-admin' : (user.role === 'Lecturer' ? 'badge-lecturer' : 'badge-janitor');
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${user.name}</strong></td>
+                <td>${user.email}</td>
+                <td><span class="${roleClass}">${user.role}</span></td>
+                <td>${user.gender}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        
+        document.querySelectorAll('.stat-card')[1].querySelector('h3').textContent = users.length;
+    }
+
+    // ============= OFFICE CRUD OPERATIONS =============
+    function openAddOfficeModal() {
+        document.getElementById('addOfficeForm').reset();
+        const modal = new bootstrap.Modal(document.getElementById('addOfficeModal'));
+        modal.show();
+    }
+
+    function addOffice() {
+        const officeNumber = document.getElementById('officeNumber').value.trim();
+        const wing = document.getElementById('officeWing').value;
+        const floor = document.getElementById('officeFloor').value;
+        const lecturer = document.getElementById('officeLecturer').value;
+        const janitor = document.getElementById('officeJanitor').value;
+        
+        if (!officeNumber) {
+            showToast('Please enter office number', 'error');
+            return;
+        }
+        
+        const newId = offices.length + 1;
+        offices.push({
+            id: newId,
+            office: officeNumber,
+            wing: wing,
+            floor: parseInt(floor),
+            lecturer: lecturer,
+            janitor: janitor
+        });
+        
+        renderOffices();
+        showToast('Office added successfully!', 'success');
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addOfficeModal'));
+        modal.hide();
+    }
+
+    function editOffice(id) {
+        const office = offices.find(o => o.id === id);
+        if (office) {
+            document.getElementById('editOfficeId').value = office.id;
+            document.getElementById('editOfficeNumber').value = office.office;
+            document.getElementById('editOfficeWing').value = office.wing;
+            document.getElementById('editOfficeFloor').value = office.floor;
+            document.getElementById('editOfficeLecturer').value = office.lecturer;
+            document.getElementById('editOfficeJanitor').value = office.janitor;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editOfficeModal'));
+            modal.show();
+        }
+    }
+
+    function updateOffice() {
+        const id = parseInt(document.getElementById('editOfficeId').value);
+        const index = offices.findIndex(o => o.id === id);
+        
+        if (index !== -1) {
+            offices[index] = {
+                id: id,
+                office: document.getElementById('editOfficeNumber').value,
+                wing: document.getElementById('editOfficeWing').value,
+                floor: parseInt(document.getElementById('editOfficeFloor').value),
+                lecturer: document.getElementById('editOfficeLecturer').value,
+                janitor: document.getElementById('editOfficeJanitor').value
+            };
+            
+            renderOffices();
+            showToast('Office updated successfully!', 'success');
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editOfficeModal'));
+            modal.hide();
+        }
+    }
+
+    function deleteOffice(id) {
+        if (confirm('Are you sure you want to delete this office?')) {
+            offices = offices.filter(o => o.id !== id);
+            renderOffices();
+            showToast('Office deleted successfully!', 'info');
+        }
+    }
+
+    // ============= NAVIGATION =============
+    document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
+        link.addEventListener('click', () => {
+            const section = link.getAttribute('data-section');
+            
+            document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            
+            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+            document.getElementById('usersSection').style.display = section === 'users' ? 'block' : 'none';
+            
+            if (section === 'users') renderUsers();
+        });
+    });
+
+    // ============= INITIALIZE =============
+    renderOffices();
+    renderUsers();
+</script>
+</body>
+</html>

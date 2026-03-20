@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Dashboard | SmartCampus - Egerton University</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --egerton-green: #00A651;
+            --egerton-green-dark: #008a43;
+            --egerton-green-deep: #007624;
+            --egerton-gold: #D2AC67;
+            --bg-light: #F8F9FC;
+            --card-white: #ffffff;
+            --text-dark: #1F2A3A;
+            --text-muted: #5a6e8a;
+            --border-color: #e9ecef;
+            --sidebar-bg: #1a472a;
+            --sidebar-hover: #2a5a3a;
+            --high-intensity-bg: #fee2e2;
+            --high-intensity-color: #e74c3c;
+            --low-intensity-bg: #e0f2e9;
+            --low-intensity-color: #00A651;
+            --pending-bg: #fff3e0;
+            --pending-color: #e67e22;
+            --completed-bg: #e0f2e9;
+            --completed-color: #00A651;
+            --alert-bg: #fee2e2;
+            --alert-color: #e74c3c;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--egerton-green-deep) 100%);
+            min-height: 100vh;
+            color: white;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-brand h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-brand p {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .nav-link-custom {
+            color: rgba(255,255,255,0.85);
+            padding: 0.7rem 1.2rem;
+            margin: 0.2rem 0.8rem;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .nav-link-custom:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link-custom.active {
+            background: var(--egerton-gold);
+            color: var(--egerton-green-deep);
+            font-weight: 600;
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        .main-content {
+            padding: 1.5rem 2rem;
+        }
+
+        .welcome-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .welcome-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Stats Cards */
+        .stat-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+            text-align: center;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, rgba(0,166,81,0.1), rgba(210,172,103,0.1));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.8rem;
+        }
+
+        .stat-icon i {
+            font-size: 1.8rem;
+            color: var(--egerton-green);
+        }
+
+        .stat-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0;
+        }
+
+        .stat-card p {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 0;
+        }
+
+        /* Alert Card */
+        .alert-card {
+            background: var(--alert-bg);
+            border-left: 4px solid var(--alert-color);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .table-custom {
+            margin-bottom: 0;
+        }
+
+        .table-custom thead {
+            background: #F8F9FC;
+        }
+
+        .table-custom th {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            padding: 0.8rem;
+        }
+
+        .table-custom td {
+            font-size: 0.85rem;
+            padding: 0.8rem;
+            vertical-align: middle;
+        }
+
+        .intensity-high {
+            background: var(--high-intensity-bg);
+            color: var(--high-intensity-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .intensity-low {
+            background: var(--low-intensity-bg);
+            color: var(--low-intensity-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-completed {
+            background: var(--completed-bg);
+            color: var(--completed-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: var(--pending-bg);
+            color: var(--pending-color);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .status-progress {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .progress-bar-custom {
+            width: 60px;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--egerton-green);
+            border-radius: 3px;
+        }
+
+        .btn-reassign {
+            background: var(--egerton-gold);
+            color: var(--egerton-green-deep);
+            border: none;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-reassign:hover {
+            background: var(--egerton-green);
+            color: white;
+        }
+
+        /* Janitor Cards */
+        .janitor-card {
+            background: var(--card-white);
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .janitor-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .janitor-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--egerton-green), var(--egerton-gold));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* Toast */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .custom-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid px-0">
+    <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="sidebar-brand">
+                <h3>SmartCampus</h3>
+                <p>Egerton University</p>
+            </div>
+            <nav class="nav flex-column">
+                <a class="nav-link-custom active" data-section="dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link-custom" data-section="monitor">
+                    <i class="bi bi-tv"></i> Live Monitor
+                </a>
+                <a class="nav-link-custom" data-section="staff">
+                    <i class="bi bi-people"></i> Janitor Staff
+                </a>
+                <a class="nav-link-custom" data-section="reports">
+                    <i class="bi bi-flag"></i> Dispute Reports
+                </a>
+                <hr class="mx-3 my-3" style="border-color: rgba(255,255,255,0.2);">
+                <a href="index.html" class="nav-link-custom">
+                    <i class="bi bi-box-arrow-left"></i> Sign Out
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <!-- Dashboard Section -->
+            <div id="dashboardSection">
+                <div class="welcome-header d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1>Supervisor Dashboard</h1>
+                        <p>Monitor and manage cleaning operations</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-dark p-2 shadow-sm">
+                            <i class="bi bi-person-circle"></i> Supervisor | mchebet@egerton.ac.ke
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+                            <h3 id="completedCount">0</h3>
+                            <p>Completed</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
+                            <h3 id="disputedCount">0</h3>
+                            <p>Disputed</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-bell"></i></div>
+                            <h3 id="activeAlerts">0</h3>
+                            <p>Active Alerts</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                            <h3 id="pendingCount">0</h3>
+                            <p>Pending</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Incomplete Tasks Alert -->
+                <div id="incompleteAlert" class="alert-card mb-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-clock-history text-danger fs-4"></i>
+                        <div>
+                            <strong>Incomplete Task Alert</strong><br>
+                            <small id="alertMessage">Task for Office A201 is still in progress past deadline</small>
+                        </div>
+                        <div class="ms-auto">
+                            <small class="text-muted" id="alertDate">2026-03-20</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Tasks Summary -->
+                <div class="table-container">
+                    <h5><i class="bi bi-list-check text-success"></i> Pending Tasks Summary</h5>
+                    <p class="text-muted small">Tasks awaiting completion</p>
+                    <div id="pendingTasksList"></div>
+                </div>
+            </div>
+
+            <!-- Live Monitor Section -->
+            <div id="monitorSection" style="display: none;">
+                <div class="table-container">
+                    <h5><i class="bi bi-tv text-success"></i> Live Task Monitor</h5>
+                    <p class="text-muted small mb-3">Real-time tracking of all cleaning tasks</p>
+                    <div class="table-responsive">
+                        <table class="table table-custom">
+                            <thead>
+                                <tr>
+                                    <th>Office</th>
+                                    <th>Intensity</th>
+                                    <th>Status</th>
+                                    <th>Progress</th>
+                                    <th>Assigned Janitor</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="liveMonitorTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Janitor Staff Section -->
+            <div id="staffSection" style="display: none;">
+                <div class="row" id="janitorStaffList"></div>
+            </div>
+
+            <!-- Dispute Reports Section -->
+            <div id="reportsSection" style="display: none;">
+                <div class="table-container">
+                    <h5><i class="bi bi-flag text-success"></i> Dispute Reports</h5>
+                    <p class="text-muted small">Reports filed by lecturers regarding cleaning quality</p>
+                    <div id="disputeReportsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reassign Modal -->
+<div class="modal fade modal-custom" id="reassignModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-arrow-repeat"></i> Reassign Task</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Reassign <strong id="reassignOfficeName"></strong> to:</p>
+                <select id="reassignJanitorSelect" class="form-select">
+                    <option value="John Kamau">John Kamau</option>
+                    <option value="Mary Njeri">Mary Njeri</option>
+                    <option value="David Kiprop">David Kiprop</option>
+                </select>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmReassign()">Reassign</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ============= DATA =============
+    let offices = [
+        { id: 1, office: "A101", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "John Kamau", deadline: "2026-03-20" },
+        { id: 2, office: "A102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "John Kamau", deadline: "2026-03-21" },
+        { id: 3, office: "A201", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "Mary Njeri", deadline: "2026-03-19" },
+        { id: 4, office: "B101", intensity: "Low", status: "completed", progress: 1, total: 1, assigned: "David Kiprop", deadline: "2026-03-20" },
+        { id: 5, office: "B102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "David Kiprop", deadline: "2026-03-21" }
+    ];
+
+    let janitors = [
+        { name: "John Kamau", initial: "JK", gender: "Male", wing: "A", completedTasks: 0, totalTasks: 2 },
+        { name: "David Kiprop", initial: "DK", gender: "Male", wing: "B", completedTasks: 1, totalTasks: 2 },
+        { name: "Mary Njeri", initial: "MN", gender: "Female", wing: "A", completedTasks: 0, totalTasks: 1 }
+    ];
+
+    let disputeReports = [];
+
+    let currentReassignOffice = null;
+
+    // ============= UTILITY FUNCTIONS =============
+    function showToast(message, type = 'success') {
+        const toastDiv = document.createElement('div');
+        toastDiv.className = 'custom-toast';
+        toastDiv.style.backgroundColor = type === 'success' ? '#00A651' : (type === 'error' ? '#dc3545' : '#17a2b8');
+        toastDiv.style.color = 'white';
+        
+        let icon = '';
+        if (type === 'success') icon = '<i class="bi bi-check-circle-fill"></i>';
+        else if (type === 'error') icon = '<i class="bi bi-exclamation-triangle-fill"></i>';
+        else icon = '<i class="bi bi-info-circle-fill"></i>';
+        
+        toastDiv.innerHTML = `${icon}<span>${message}</span>`;
+        document.body.appendChild(toastDiv);
+        
+        setTimeout(() => {
+            toastDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toastDiv.remove(), 300);
+        }, 3000);
+        
+        toastDiv.onclick = () => {
+            toastDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toastDiv.remove(), 300);
+        };
+    }
+
+    function updateStats() {
+        const completed = offices.filter(o => o.status === 'completed').length;
+        const pending = offices.filter(o => o.status === 'pending' || o.status === 'in progress').length;
+        const disputed = disputeReports.length;
+        
+        // Check for overdue tasks (in progress past deadline)
+        const today = new Date().toISOString().split('T')[0];
+        const overdueTasks = offices.filter(o => o.status === 'in progress' && o.deadline < today);
+        const activeAlerts = overdueTasks.length + disputed;
+        
+        document.getElementById('completedCount').textContent = completed;
+        document.getElementById('pendingCount').textContent = pending;
+        document.getElementById('disputedCount').textContent = disputed;
+        document.getElementById('activeAlerts').textContent = activeAlerts;
+        
+        // Update alert message
+        if (overdueTasks.length > 0) {
+            const overdueOffice = overdueTasks[0];
+            document.getElementById('alertMessage').innerHTML = `Task for Office ${overdueOffice.office} is still in progress past deadline`;
+            document.getElementById('alertDate').textContent = overdueOffice.deadline;
+            document.getElementById('incompleteAlert').style.display = 'block';
+        } else {
+            document.getElementById('incompleteAlert').style.display = 'none';
+        }
+        
+        return { completed, pending, disputed, activeAlerts };
+    }
+
+    function renderPendingTasks() {
+        const container = document.getElementById('pendingTasksList');
+        if (!container) return;
+        
+        const pendingOffices = offices.filter(o => o.status === 'pending' || o.status === 'in progress');
+        
+        if (pendingOffices.length === 0) {
+            container.innerHTML = '<div class="text-center py-4 text-muted">No pending tasks</div>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        pendingOffices.forEach(office => {
+            const percent = (office.progress / office.total) * 100;
+            const statusClass = office.status === 'in progress' ? 'status-progress' : 'status-pending';
+            const statusText = office.status === 'in progress' ? 'In Progress' : 'Pending';
+            
+            const item = document.createElement('div');
+            item.className = 'task-item';
+            item.innerHTML = `
+                <div class="task-content">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <strong>${office.office}</strong>
+                        <span class="${statusClass}">${statusText}</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">${office.intensity} Intensity</small>
+                        <small class="text-muted">Assigned: ${office.assigned}</small>
+                    </div>
+                    <div class="progress-bar-custom mt-2" style="width: 100%;">
+                        <div class="progress-fill" style="width: ${percent}%"></div>
+                    </div>
+                    <small class="text-muted">${office.progress}/${office.total} tasks completed</small>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function renderLiveMonitor() {
+        const tbody = document.getElementById('liveMonitorTable');
+        if (!tbody) return;
+        
+        tbody.innerHTML = '';
+        
+        offices.forEach(office => {
+            const percent = (office.progress / office.total) * 100;
+            const intensityClass = office.intensity === 'High' ? 'intensity-high' : 'intensity-low';
+            let statusClass = '';
+            let statusText = '';
+            
+            if (office.status === 'completed') {
+                statusClass = 'status-completed';
+                statusText = 'Completed';
+            } else if (office.status === 'in progress') {
+                statusClass = 'status-progress';
+                statusText = 'In Progress';
+            } else {
+                statusClass = 'status-pending';
+                statusText = 'Pending';
+            }
+            
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${office.office}</strong></td>
+                <td><span class="${intensityClass}">${office.intensity}</span></td>
+                <td><span class="${statusClass}">${statusText}</span></td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="progress-bar-custom">
+                            <div class="progress-fill" style="width: ${percent}%"></div>
+                        </div>
+                        <small>${office.progress}/${office.total}</small>
+                    </div>
+                </td>
+                <td>${office.assigned}</td>
+                <td>
+                    <button class="btn-reassign" onclick="openReassignModal(${office.id}, '${office.office}')">
+                        <i class="bi bi-arrow-repeat"></i> Reassign
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    function renderJanitorStaff() {
+        const container = document.getElementById('janitorStaffList');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        janitors.forEach(janitor => {
+            const percent = janitor.totalTasks > 0 ? (janitor.completedTasks / janitor.totalTasks) * 100 : 0;
+            
+            const card = document.createElement('div');
+            card.className = 'col-md-4 mb-3';
+            card.innerHTML = `
+                <div class="janitor-card">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="janitor-avatar">${janitor.initial}</div>
+                        <div>
+                            <h6 class="mb-0">${janitor.name}</h6>
+                            <small class="text-muted">${janitor.gender} · Wing ${janitor.wing}</small>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small>Task Completion</small>
+                            <small>${janitor.completedTasks}/${janitor.totalTasks}</small>
+                        </div>
+                        <div class="progress-bar-custom" style="width: 100%;">
+                            <div class="progress-fill" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function renderDisputeReports() {
+        const container = document.getElementById('disputeReportsList');
+        if (!container) return;
+        
+        if (disputeReports.length === 0) {
+            container.innerHTML = '<div class="text-center py-4 text-muted">No dispute reports</div>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        disputeReports.forEach(report => {
+            const item = document.createElement('div');
+            item.className = 'alert-card mb-2';
+            item.style.background = '#fff3e0';
+            item.style.borderLeftColor = '#e67e22';
+            item.innerHTML = `
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>${report.office}</strong> - ${report.task}
+                        <p class="small mb-0 mt-1">${report.reason}</p>
+                        ${report.notes ? `<small class="text-muted">Notes: ${report.notes}</small>` : ''}
+                    </div>
+                    <div class="text-end">
+                        <small class="text-muted">${report.date}</small>
+                        <div class="mt-1">
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    function openReassignModal(officeId, officeName) {
+        currentReassignOffice = offices.find(o => o.id === officeId);
+        if (currentReassignOffice) {
+            document.getElementById('reassignOfficeName').textContent = officeName;
+            const select = document.getElementById('reassignJanitorSelect');
+            select.value = currentReassignOffice.assigned;
+            const modal = new bootstrap.Modal(document.getElementById('reassignModal'));
+            modal.show();
+        }
+    }
+
+    function confirmReassign() {
+        if (currentReassignOffice) {
+            const newJanitor = document.getElementById('reassignJanitorSelect').value;
+            const oldJanitor = currentReassignOffice.assigned;
+            
+            currentReassignOffice.assigned = newJanitor;
+            
+            // Update janitor task counts
+            updateJanitorStats();
+            
+            showToast(`Reassigned ${currentReassignOffice.office} from ${oldJanitor} to ${newJanitor}`, 'success');
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('reassignModal'));
+            modal.hide();
+            
+            renderLiveMonitor();
+            renderPendingTasks();
+            renderJanitorStaff();
+            updateStats();
+            saveState();
+        }
+    }
+
+    function updateJanitorStats() {
+        // Reset janitor stats
+        janitors.forEach(j => {
+            j.completedTasks = 0;
+            j.totalTasks = 0;
+        });
+        
+        // Calculate based on current assignments
+        offices.forEach(office => {
+            const janitor = janitors.find(j => j.name === office.assigned);
+            if (janitor) {
+                janitor.totalTasks++;
+                if (office.status === 'completed') {
+                    janitor.completedTasks++;
+                }
+            }
+        });
+    }
+
+    function syncWithLecturerAndJanitor() {
+        // This would normally sync with localStorage from other dashboards
+        try {
+            const lecturerState = localStorage.getItem('lecturerDashboardState');
+            const janitorState = localStorage.getItem('janitorDashboardState');
+            
+            if (janitorState) {
+                const janitorData = JSON.parse(janitorState);
+                if (janitorData.assignedOffices) {
+                    // Update office statuses based on janitor progress
+                    janitorData.assignedOffices.forEach(janitorOffice => {
+                        const office = offices.find(o => o.office === janitorOffice.officeNumber);
+                        if (office) {
+                            const completedTasks = janitorOffice.tasks.filter(t => t.completed).length;
+                            office.progress = completedTasks;
+                            office.total = janitorOffice.tasks.length;
+                            
+                            if (janitorOffice.isClean) {
+                                office.status = 'completed';
+                            } else if (completedTasks > 0 && completedTasks < office.total) {
+                                office.status = 'in progress';
+                            } else if (completedTasks === 0) {
+                                office.status = 'pending';
+                            }
+                        }
+                    });
+                }
+            }
+            
+            if (lecturerState) {
+                const lecturerData = JSON.parse(lecturerState);
+                if (lecturerData.reports) {
+                    disputeReports = lecturerData.reports;
+                }
+            }
+        } catch(e) {
+            console.log('Sync error:', e);
+        }
+        
+        updateJanitorStats();
+    }
+
+    function saveState() {
+        const state = {
+            offices: offices,
+            janitors: janitors,
+            disputeReports: disputeReports
+        };
+        localStorage.setItem('supervisorDashboardState', JSON.stringify(state));
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem('supervisorDashboardState');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                offices = state.offices;
+                janitors = state.janitors;
+                disputeReports = state.disputeReports || [];
+            } catch(e) {
+                resetToDefault();
+            }
+        } else {
+            resetToDefault();
+        }
+        
+        syncWithLecturerAndJanitor();
+        renderAll();
+    }
+    
+    function resetToDefault() {
+        offices = [
+            { id: 1, office: "A101", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "John Kamau", deadline: "2026-03-20" },
+            { id: 2, office: "A102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "John Kamau", deadline: "2026-03-21" },
+            { id: 3, office: "A201", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "Mary Njeri", deadline: "2026-03-19" },
+            { id: 4, office: "B101", intensity: "Low", status: "completed", progress: 1, total: 1, assigned: "David Kiprop", deadline: "2026-03-20" },
+            { id: 5, office: "B102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "David Kiprop", deadline: "2026-03-21" }
+        ];
+        
+        janitors = [
+            { name: "John Kamau", initial: "JK", gender: "Male", wing: "A", completedTasks: 0, totalTasks: 2 },
+            { name: "David Kiprop", initial: "DK", gender: "Male", wing: "B", completedTasks: 1, totalTasks: 2 },
+            { name: "Mary Njeri", initial: "MN", gender: "Female", wing: "A", completedTasks: 0, totalTasks: 1 }
+        ];
+        
+        disputeReports = [];
+        updateJanitorStats();
+    }
+
+    function renderAll() {
+        updateStats();
+        renderPendingTasks();
+        renderLiveMonitor();
+        renderJanitorStaff();
+        renderDisputeReports();
+    }
+
+    // Navigation
+    document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
+        link.addEventListener('click', () => {
+            const section = link.getAttribute('data-section');
+            
+            document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            
+            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+            document.getElementById('monitorSection').style.display = section === 'monitor' ? 'block' : 'none';
+            document.getElementById('staffSection').style.display = section === 'staff' ? 'block' : 'none';
+            document.getElementById('reportsSection').style.display = section === 'reports' ? 'block' : 'none';
+            
+            if (section === 'monitor') renderLiveMonitor();
+            if (section === 'staff') renderJanitorStaff();
+            if (section === 'reports') renderDisputeReports();
+        });
+    });
+    
+    // Initialize
+    loadState();
+    setInterval(() => {
+        syncWithLecturerAndJanitor();
+        renderAll();
+    }, 3000);
+    
+    // Expose functions
+    window.openReassignModal = openReassignModal;
+    window.confirmReassign = confirmReassign;
+</script>
+</body>
+</html>
