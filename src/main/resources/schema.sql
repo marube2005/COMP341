@@ -72,20 +72,42 @@ CREATE TABLE IF NOT EXISTS cleaning_tasks (
 -- Seed data – demo accounts for local development/demo only.
 -- WARNING: Remove or replace these accounts and their passwords
 -- before deploying to production environments.
+--
+-- Passwords (BCrypt cost 12, jBCrypt 0.4):
+--   admin@egerton.ac.ke    → admin123
+--   swanjiku@egerton.ac.ke → lecturer123
+--   jkamau@egerton.ac.ke   → janitor123
+--   mchebet@egerton.ac.ke  → super123
 -- ─────────────────────────────────────────────────────────────
 INSERT IGNORE INTO users (id, name, email, password, role, phone, department) VALUES
 (1, 'System Administrator', 'admin@egerton.ac.ke',
- '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy',
+ '$2a$12$8dvqkQCV/XismkxR6/sEt.M5UR3269RycFU/prN/uMaIULYwu4sqm',
  'admin', '+254700000001', 'ICT'),
 (2, 'Dr. Sarah Wanjiku', 'swanjiku@egerton.ac.ke',
- '$2a$12$GudqsrBbVFVhQ4S49yNy5.T6dSnNfknxjCOcCMlYlDWfk.A05sQoe',
+ '$2a$12$Jo/.e/mrsszbM1pAil4Qk.1rcYqT/qEqSwEYb8BZ7WvRXQeoLN4MO',
  'lecturer', '+254700000002', 'Computer Science'),
 (3, 'James Kamau', 'jkamau@egerton.ac.ke',
- '$2a$12$TqvHfREpMb1fD1WUqZ3ZvuQWzJRf.8FqWAtYOSakLWkmhV1w01VOe',
+ '$2a$12$uRwWXOUEHz7Ot6kCmozKcOeJN9OHQRRzyOiQ1HvlnvhPbEyy4dxou',
  'janitor', '+254700000003', 'Facilities'),
 (4, 'Mary Chebet', 'mchebet@egerton.ac.ke',
- '$2a$12$XQ0MNKXH2qPjXbBriuSITOS9z8JqmDL6mfLcPOQYcPAiAIz4hYxkO',
+ '$2a$12$YylEmtjkMbs1sVkRyCiRa.h4GWkd7t5RKaQU1ep8NfwxR9TAmKF6G',
  'supervisor', '+254700000004', 'Facilities');
+
+-- Fix passwords for any existing database that was seeded with incorrect hashes.
+-- These UPDATE statements are idempotent: they only update rows whose stored hash
+-- does not already match the intended demo password.
+UPDATE users SET password = '$2a$12$8dvqkQCV/XismkxR6/sEt.M5UR3269RycFU/prN/uMaIULYwu4sqm'
+    WHERE id = 1 AND email = 'admin@egerton.ac.ke'
+      AND password = '$2a$12$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy';
+UPDATE users SET password = '$2a$12$Jo/.e/mrsszbM1pAil4Qk.1rcYqT/qEqSwEYb8BZ7WvRXQeoLN4MO'
+    WHERE id = 2 AND email = 'swanjiku@egerton.ac.ke'
+      AND password = '$2a$12$GudqsrBbVFVhQ4S49yNy5.T6dSnNfknxjCOcCMlYlDWfk.A05sQoe';
+UPDATE users SET password = '$2a$12$uRwWXOUEHz7Ot6kCmozKcOeJN9OHQRRzyOiQ1HvlnvhPbEyy4dxou'
+    WHERE id = 3 AND email = 'jkamau@egerton.ac.ke'
+      AND password = '$2a$12$TqvHfREpMb1fD1WUqZ3ZvuQWzJRf.8FqWAtYOSakLWkmhV1w01VOe';
+UPDATE users SET password = '$2a$12$YylEmtjkMbs1sVkRyCiRa.h4GWkd7t5RKaQU1ep8NfwxR9TAmKF6G'
+    WHERE id = 4 AND email = 'mchebet@egerton.ac.ke'
+      AND password = '$2a$12$XQ0MNKXH2qPjXbBriuSITOS9z8JqmDL6mfLcPOQYcPAiAIz4hYxkO';
 
 INSERT IGNORE INTO facilities (id, name, location, facility_type, capacity, status, description) VALUES
 (1, 'SCI 101 – Lecture Hall A', 'Science Complex, Block A', 'classroom', 120, 'available', 'Large lecture hall with projector and AC'),
