@@ -152,6 +152,10 @@ public class CleaningTaskServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
+        } else if (user.getRole() != User.Role.admin && user.getRole() != User.Role.supervisor) {
+            // Only admin/supervisor may update arbitrary tasks
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
         }
 
         ctDAO.updateStatus(id, CleaningTask.Status.valueOf(statusStr));
