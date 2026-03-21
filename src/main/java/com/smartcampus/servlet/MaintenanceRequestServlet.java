@@ -262,11 +262,20 @@ public class MaintenanceRequestServlet extends HttpServlet {
 
     // ─── Helpers ──────────────────────────────────────────────
 
+    private boolean isValidTitle(String title) {
+        if (ValidationUtil.isBlank(title)) {
+            return false;
+        }
+        String trimmed = title.trim();
+        int length = trimmed.length();
+        return length >= 2 && length <= 200;
+    }
+
     private String validateRequestInput(String facilityIdStr, String title,
                                         String description, String priorityStr) {
         if (!ValidationUtil.isPositiveInt(facilityIdStr)) return "Please select a valid facility.";
-        if (!ValidationUtil.isValidName(title))           return "Title is required (2–150 characters).";
-        if (ValidationUtil.isBlank(description))          return "Description is required.";
+        if (!isValidTitle(title))                        return "Title is required (2–200 characters).";
+        if (ValidationUtil.isBlank(description))         return "Description is required.";
         if (!isValidEnum(MaintenanceRequest.Priority.class, priorityStr)) return "Invalid priority value.";
         return null;
     }
