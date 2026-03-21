@@ -59,7 +59,7 @@ public class UserDAO {
     /** Returns users with a specific role. */
     public List<User> findByRole(User.Role role) throws SQLException {
         List<User> users = new ArrayList<>();
-        String sql = "SELECT * FROM users WHERE role = ? ORDER BY name";
+        String sql = "SELECT * FROM users WHERE role = ? AND active = 1 ORDER BY name";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, role.name());
