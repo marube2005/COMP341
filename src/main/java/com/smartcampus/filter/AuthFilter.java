@@ -55,7 +55,9 @@ public class AuthFilter implements Filter {
 
         // Role-based access checks
         if (!isAuthorised(localPath, user.getRole())) {
-            resp.sendRedirect(contextPath + "/403.jsp");
+            resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            RequestDispatcher dispatcher = req.getRequestDispatcher("/403.jsp");
+            dispatcher.forward(req, resp);
             return;
         }
 
