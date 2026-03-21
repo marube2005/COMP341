@@ -1,0 +1,22 @@
+# Build output
+target/
+*.class
+*.war
+*.jar
+
+# NetBeans / IDE
+nb-configuration.xml
+.nb-gradle/
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven wrapper
+.mvn/
+mvnw
+mvnw.cmd
