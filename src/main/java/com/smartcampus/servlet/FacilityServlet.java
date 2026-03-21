@@ -47,7 +47,8 @@ public class FacilityServlet extends HttpServlet {
                     return;
                 }
                 req.setAttribute("facility", facility);
-                req.getRequestDispatcher("/WEB-INF/views/admin/facility-detail.jsp").forward(req, resp);
+                req.setAttribute("facilities", java.util.Collections.singletonList(facility));
+                req.getRequestDispatcher("/WEB-INF/views/admin/facilities.jsp").forward(req, resp);
             } else {
                 req.setAttribute("facilities", facilityDAO.findAll());
                 req.getRequestDispatcher("/WEB-INF/views/admin/facilities.jsp").forward(req, resp);
