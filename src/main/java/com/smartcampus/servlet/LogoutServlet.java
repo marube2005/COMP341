@@ -32,13 +32,15 @@ public class LogoutServlet extends HttpServlet {
             session.invalidate();
         }
 
-        // Remove remember-me cookie if present
+        // Expire the JSESSIONID cookie explicitly (belt-and-suspenders alongside session.invalidate())
         Cookie[] cookies = req.getCookies();
         if (cookies != null) {
             for (Cookie c : cookies) {
                 if ("JSESSIONID".equals(c.getName())) {
                     c.setMaxAge(0);
                     c.setPath(req.getContextPath().isEmpty() ? "/" : req.getContextPath());
+                    c.setHttpOnly(true);
+                    c.setSecure(req.isSecure()); // honour the scheme of the current request
                     resp.addCookie(c);
                 }
             }
