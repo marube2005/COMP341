@@ -32,7 +32,7 @@ public class LoginServlet extends HttpServlet {
             redirectToDashboard(resp, req.getContextPath(), user.getRole());
             return;
         }
-        req.getRequestDispatcher("/login.jsp").forward(req, resp);
+        req.getRequestDispatcher("/index.jsp").forward(req, resp);
     }
 
     /** Processes the login form submission. */
@@ -47,12 +47,12 @@ public class LoginServlet extends HttpServlet {
         // ─── Validation ──────────────────────────────────────────
         if (!ValidationUtil.isValidEmail(email)) {
             req.setAttribute("error", "Please enter a valid email address.");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/index.jsp").forward(req, resp);
             return;
         }
         if (!ValidationUtil.isValidPassword(password)) {
             req.setAttribute("error", "Password must be at least 6 characters.");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/index.jsp").forward(req, resp);
             return;
         }
 
@@ -62,7 +62,7 @@ public class LoginServlet extends HttpServlet {
             if (user == null) {
                 req.setAttribute("error", "Invalid email address or password.");
                 req.setAttribute("emailValue", email);
-                req.getRequestDispatcher("/login.jsp").forward(req, resp);
+                req.getRequestDispatcher("/index.jsp").forward(req, resp);
                 return;
             }
 
@@ -83,11 +83,11 @@ public class LoginServlet extends HttpServlet {
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "Database error during login", e);
             req.setAttribute("error", "A system error occurred. Please try again later.");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/index.jsp").forward(req, resp);
         } catch (RuntimeException e) {
             LOGGER.log(Level.SEVERE, "Unexpected error during login", e);
             req.setAttribute("error", "A system error occurred. Please try again later.");
-            req.getRequestDispatcher("/login.jsp").forward(req, resp);
+            req.getRequestDispatcher("/index.jsp").forward(req, resp);
         }
     }
 

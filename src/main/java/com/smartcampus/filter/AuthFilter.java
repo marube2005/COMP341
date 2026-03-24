@@ -20,7 +20,8 @@ public class AuthFilter implements Filter {
     /** URL paths that are always accessible without a session. */
     private static final Set<String> PUBLIC_PATHS = new HashSet<>(Arrays.asList(
             "/login",
-            "/login.jsp"
+            "/login.jsp",
+            "/index.jsp"
     ));
 
     @Override
