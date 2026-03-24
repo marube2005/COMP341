@@ -50,6 +50,7 @@ public class DashboardServlet extends HttpServlet {
                     req.setAttribute("totalFacilities",  facDAO.count());
                     req.setAttribute("pendingRequests",  mrDAO.countByStatus(MaintenanceRequest.Status.pending));
                     req.setAttribute("activeFacilities", facDAO.countByStatus(Facility.Status.available));
+                    req.setAttribute("completedToday",   ctDAO.countCompletedToday());
                     req.setAttribute("allUsers",         userDAO.findAll());
                     req.setAttribute("allFacilities",    facDAO.findAll());
                     req.setAttribute("allRequests",      mrDAO.findAll());
