@@ -89,7 +89,12 @@
                 </td>
                 <td>
                   <button class="btn btn-sm btn-outline-primary me-1"
-                          onclick="openEditModal(<%= u.getId() %>,'<%= u.getName().replace("'","\\'") %>','<%= u.getRole().name() %>','<%= u.getPhone() != null ? u.getPhone() : "" %>','<%= u.getDepartment() != null ? u.getDepartment().replace("'","\\'") : "" %>')">
+                          data-user-id="<%= u.getId() %>"
+                          data-user-name="<%= u.getName() != null ? u.getName().replace("\"","&quot;") : "" %>"
+                          data-user-role="<%= u.getRole().name() %>"
+                          data-user-phone="<%= u.getPhone() != null ? u.getPhone().replace("\"","&quot;") : "" %>"
+                          data-user-dept="<%= u.getDepartment() != null ? u.getDepartment().replace("\"","&quot;") : "" %>"
+                          onclick="openEditModal(this.dataset.userId, this.dataset.userName, this.dataset.userRole, this.dataset.userPhone, this.dataset.userDept)">
                     <i class="bi bi-pencil-fill"></i>
                   </button>
                   <% if (u.isActive()) { %>
