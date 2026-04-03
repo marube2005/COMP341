@@ -18,13 +18,14 @@ public class User {
     private Role role;
     private String phone;
     private String department;
+    private String staffId;         // e.g. JAN-2024-001, ADM-2023-002, SUP-2021-134
     private boolean active;
     private LocalDateTime createdAt;
 
     public User() {}
 
     public User(int id, String name, String email, String password,
-                Role role, String phone, String department,
+                Role role, String phone, String department, String staffId,
                 boolean active, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
@@ -33,6 +34,7 @@ public class User {
         this.role = role;
         this.phone = phone;
         this.department = department;
+        this.staffId = staffId;
         this.active = active;
         this.createdAt = createdAt;
     }
@@ -46,6 +48,7 @@ public class User {
     public Role getRole() { return role; }
     public String getPhone() { return phone; }
     public String getDepartment() { return department; }
+    public String getStaffId() { return staffId; }
     public boolean isActive() { return active; }
     public LocalDateTime getCreatedAt() { return createdAt; }
 
@@ -58,6 +61,7 @@ public class User {
     public void setRole(Role role) { this.role = role; }
     public void setPhone(String phone) { this.phone = phone; }
     public void setDepartment(String department) { this.department = department; }
+    public void setStaffId(String staffId) { this.staffId = staffId; }
     public void setActive(boolean active) { this.active = active; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 

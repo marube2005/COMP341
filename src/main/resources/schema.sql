@@ -38,9 +38,13 @@ CREATE TABLE IF NOT EXISTS users (
     role        ENUM('admin','lecturer','janitor','supervisor') NOT NULL,
     phone       VARCHAR(20),
     department  VARCHAR(100),
+    staff_id    VARCHAR(20),                     -- e.g. JAN-2024-001, ADM-2023-002, SUP-2021-134
     active      TINYINT(1)    NOT NULL DEFAULT 1,
     created_at  DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
+
+-- Add staff_id column to existing installations (safe no-op if already present)
+ALTER TABLE users ADD COLUMN IF NOT EXISTS staff_id VARCHAR(20);
 
 -- ─────────────────────────────────────────────────────────────
 -- Facilities table
@@ -78,36 +82,40 @@ CREATE TABLE IF NOT EXISTS cleaning_tasks (
 -- before deploying to production environments.
 --
 -- Passwords (BCrypt cost 12, jBCrypt 0.4):
---   admin@egerton.ac.ke    → admin123
---   swanjiku@egerton.ac.ke → lecturer123
---   jkamau@egerton.ac.ke   → janitor123
---   mchebet@egerton.ac.ke  → super123
+--   admin.admin@egerton.ac.ke        → admin123
+--   swanjiku.lecturer@egerton.ac.ke  → lecturer123
+--   jkamau.janitor@egerton.ac.ke     → janitor123
+--   mchebet.supervisor@egerton.ac.ke → super123
 -- ─────────────────────────────────────────────────────────────
-INSERT IGNORE INTO users (id, name, email, password, role, phone, department) VALUES
-(1, 'System Administrator', 'admin@egerton.ac.ke',
+INSERT IGNORE INTO users (id, name, email, password, role, phone, department, staff_id) VALUES
+(1, 'System Administrator', 'admin.admin@egerton.ac.ke',
  '$2a$12$8dvqkQCV/XismkxR6/sEt.M5UR3269RycFU/prN/uMaIULYwu4sqm',
- 'admin', '+254700000001', 'ICT'),
-(2, 'Dr. Sarah Wanjiku', 'swanjiku@egerton.ac.ke',
+ 'admin', '+254700000001', 'ICT', 'ADM-2023-001'),
+(2, 'Dr. Sarah Wanjiku', 'swanjiku.lecturer@egerton.ac.ke',
  '$2a$12$Jo/.e/mrsszbM1pAil4Qk.1rcYqT/qEqSwEYb8BZ7WvRXQeoLN4MO',
- 'lecturer', '+254700000002', 'Computer Science'),
-(3, 'James Kamau', 'jkamau@egerton.ac.ke',
+ 'lecturer', '+254700000002', 'Computer Science', NULL),
+(3, 'James Kamau', 'jkamau.janitor@egerton.ac.ke',
  '$2a$12$uRwWXOUEHz7Ot6kCmozKcOeJN9OHQRRzyOiQ1HvlnvhPbEyy4dxou',
- 'janitor', '+254700000003', 'Facilities'),
-(4, 'Mary Chebet', 'mchebet@egerton.ac.ke',
+ 'janitor', '+254700000003', 'Facilities', 'JAN-2021-001'),
+(4, 'Mary Chebet', 'mchebet.supervisor@egerton.ac.ke',
  '$2a$12$YylEmtjkMbs1sVkRyCiRa.h4GWkd7t5RKaQU1ep8NfwxR9TAmKF6G',
- 'supervisor', '+254700000004', 'Facilities');
+ 'supervisor', '+254700000004', 'Facilities', 'SUP-2022-001');
 
 -- Ensure demo account passwords are always correct (idempotent – safe to re-run).
 -- These UPDATE statements run unconditionally so that any existing database with
 -- incorrect hashes is automatically fixed when the schema is re-applied.
-UPDATE users SET password = '$2a$12$8dvqkQCV/XismkxR6/sEt.M5UR3269RycFU/prN/uMaIULYwu4sqm'
-    WHERE id = 1 AND email = 'admin@egerton.ac.ke';
-UPDATE users SET password = '$2a$12$Jo/.e/mrsszbM1pAil4Qk.1rcYqT/qEqSwEYb8BZ7WvRXQeoLN4MO'
-    WHERE id = 2 AND email = 'swanjiku@egerton.ac.ke';
-UPDATE users SET password = '$2a$12$uRwWXOUEHz7Ot6kCmozKcOeJN9OHQRRzyOiQ1HvlnvhPbEyy4dxou'
-    WHERE id = 3 AND email = 'jkamau@egerton.ac.ke';
-UPDATE users SET password = '$2a$12$YylEmtjkMbs1sVkRyCiRa.h4GWkd7t5RKaQU1ep8NfwxR9TAmKF6G'
-    WHERE id = 4 AND email = 'mchebet@egerton.ac.ke';
+UPDATE users SET password = '$2a$12$8dvqkQCV/XismkxR6/sEt.M5UR3269RycFU/prN/uMaIULYwu4sqm',
+                email = 'admin.admin@egerton.ac.ke', staff_id = 'ADM-2023-001'
+    WHERE id = 1;
+UPDATE users SET password = '$2a$12$Jo/.e/mrsszbM1pAil4Qk.1rcYqT/qEqSwEYb8BZ7WvRXQeoLN4MO',
+                email = 'swanjiku.lecturer@egerton.ac.ke'
+    WHERE id = 2;
+UPDATE users SET password = '$2a$12$uRwWXOUEHz7Ot6kCmozKcOeJN9OHQRRzyOiQ1HvlnvhPbEyy4dxou',
+                email = 'jkamau.janitor@egerton.ac.ke', staff_id = 'JAN-2021-001'
+    WHERE id = 3;
+UPDATE users SET password = '$2a$12$YylEmtjkMbs1sVkRyCiRa.h4GWkd7t5RKaQU1ep8NfwxR9TAmKF6G',
+                email = 'mchebet.supervisor@egerton.ac.ke', staff_id = 'SUP-2022-001'
+    WHERE id = 4;
 
 INSERT IGNORE INTO facilities (id, name, location, facility_type, capacity, status, description) VALUES
 (1, 'A101', 'Wing A', 'office', 10, 'available', 'Wing A ground floor office'),

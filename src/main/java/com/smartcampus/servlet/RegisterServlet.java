@@ -51,7 +51,8 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
         if (!ValidationUtil.isValidEmail(email)) {
-            forward(req, resp, "Please enter a valid email address.", name, email, phone, gender, roleStr, department);
+            forward(req, resp, "Email must be in the format name.role@egerton.ac.ke (e.g. john.lecturer@egerton.ac.ke).",
+                    name, email, phone, gender, roleStr, department);
             return;
         }
         if (!ValidationUtil.isValidPhoneOrBlank(phone) || ValidationUtil.isBlank(phone)) {
@@ -75,11 +76,32 @@ public class RegisterServlet extends HttpServlet {
             return;
         }
 
+        // Verify that the role suffix in the email matches the selected role
+        if (!ValidationUtil.isEmailRoleMatch(email, role.name())) {
+            forward(req, resp,
+                    "Your email role suffix must match your selected role. "
+                    + "For a " + role.name() + " account use: yourname." + role.name() + "@egerton.ac.ke",
+                    name, email, phone, gender, roleStr, department);
+            return;
+        }
+
         // Build department string that combines optional role-specific metadata
         String staffId     = req.getParameter("staffId");
         String wing        = req.getParameter("wing");
         String officeNumber = req.getParameter("officeNumber");
         String floor       = req.getParameter("floor");
+
+        // Validate staff ID for roles that require it
+        if (role == User.Role.janitor || role == User.Role.admin || role == User.Role.supervisor) {
+            if (!ValidationUtil.isValidStaffId(staffId, role.name())) {
+                String prefix = ValidationUtil.getStaffIdPrefix(role.name());
+                forward(req, resp,
+                        "Staff ID is required and must follow the format " + prefix + "-YYYY-NNN "
+                        + "(e.g., " + prefix + "-2024-001).",
+                        name, email, phone, gender, roleStr, department);
+                return;
+            }
+        }
 
         String deptValue = buildDepartment(role, department, staffId, wing, officeNumber, floor);
 
@@ -89,6 +111,9 @@ public class RegisterServlet extends HttpServlet {
         user.setPhone(phone.trim());
         user.setRole(role);
         user.setDepartment(deptValue);
+        if (staffId != null && !staffId.trim().isEmpty()) {
+            user.setStaffId(staffId.trim().toUpperCase());
+        }
         user.setActive(true);
 
         try {

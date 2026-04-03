@@ -109,8 +109,8 @@ public class UserDAO {
             throw new IllegalArgumentException("Email already registered: " + user.getEmail());
         }
         String hashed = BCrypt.hashpw(plainPassword, BCrypt.gensalt(12));
-        String sql = "INSERT INTO users (name, email, password, role, phone, department, active) "
-                   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (name, email, password, role, phone, department, staff_id, active) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, user.getName());
@@ -119,7 +119,8 @@ public class UserDAO {
             ps.setString(4, user.getRole().name());
             ps.setString(5, user.getPhone());
             ps.setString(6, user.getDepartment());
-            ps.setBoolean(7, user.isActive());
+            ps.setString(7, user.getStaffId());
+            ps.setBoolean(8, user.isActive());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) return keys.getInt(1);
@@ -186,6 +187,7 @@ public class UserDAO {
         u.setRole(User.Role.valueOf(rs.getString("role")));
         u.setPhone(rs.getString("phone"));
         u.setDepartment(rs.getString("department"));
+        u.setStaffId(rs.getString("staff_id"));
         u.setActive(rs.getBoolean("active"));
         Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) u.setCreatedAt(ts.toLocalDateTime());

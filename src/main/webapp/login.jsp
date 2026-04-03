@@ -103,7 +103,7 @@
                 <div class="form-group">
                     <label for="emailInput" class="form-label"><i class="bi bi-envelope-fill"></i> Email address</label>
                     <input type="email" name="email" class="form-control" id="emailInput"
-                           placeholder="your@egerton.ac.ke"
+                           placeholder="name.role@egerton.ac.ke"
                            value="<%= emailValue != null ? emailValue : "" %>"
                            autocomplete="off"
                            required>
@@ -127,21 +127,21 @@
         <div class="demo-card">
             <div class="demo-title"><i class="bi bi-stars"></i> QUICK DEMO ACCESS <i class="bi bi-stars"></i></div>
             <div class="demo-grid">
-                <div class="demo-item" onclick="fillDemo('admin@egerton.ac.ke','admin123')">
+                <div class="demo-item" onclick="fillDemo('admin.admin@egerton.ac.ke','admin123')">
                     <div class="demo-icon"><i class="bi bi-shield-lock-fill"></i></div>
-                    <div class="demo-info"><span>Administrator</span><small>admin@egerton.ac.ke</small></div>
+                    <div class="demo-info"><span>Administrator</span><small>admin.admin@egerton.ac.ke</small></div>
                 </div>
-                <div class="demo-item" onclick="fillDemo('swanjiku@egerton.ac.ke','lecturer123')">
+                <div class="demo-item" onclick="fillDemo('swanjiku.lecturer@egerton.ac.ke','lecturer123')">
                     <div class="demo-icon"><i class="bi bi-mortarboard-fill"></i></div>
-                    <div class="demo-info"><span>Lecturer</span><small>swanjiku@egerton.ac.ke</small></div>
+                    <div class="demo-info"><span>Lecturer</span><small>swanjiku.lecturer@egerton.ac.ke</small></div>
                 </div>
-                <div class="demo-item" onclick="fillDemo('jkamau@egerton.ac.ke','janitor123')">
+                <div class="demo-item" onclick="fillDemo('jkamau.janitor@egerton.ac.ke','janitor123')">
                     <div class="demo-icon"><i class="bi bi-tools"></i></div>
-                    <div class="demo-info"><span>Janitor</span><small>jkamau@egerton.ac.ke</small></div>
+                    <div class="demo-info"><span>Janitor</span><small>jkamau.janitor@egerton.ac.ke</small></div>
                 </div>
-                <div class="demo-item" onclick="fillDemo('mchebet@egerton.ac.ke','super123')">
+                <div class="demo-item" onclick="fillDemo('mchebet.supervisor@egerton.ac.ke','super123')">
                     <div class="demo-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
-                    <div class="demo-info"><span>Supervisor</span><small>mchebet@egerton.ac.ke</small></div>
+                    <div class="demo-info"><span>Supervisor</span><small>mchebet.supervisor@egerton.ac.ke</small></div>
                 </div>
             </div>
         </div>

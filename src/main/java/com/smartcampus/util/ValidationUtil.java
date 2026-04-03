@@ -8,9 +8,15 @@ import java.util.regex.Pattern;
  */
 public final class ValidationUtil {
 
-    /** RFC-5322-inspired email pattern (pragmatic subset). */
+    /**
+     * Egerton University email pattern.
+     * Required format: {@code name.role@egerton.ac.ke}
+     * where {@code role} is one of: admin, lecturer, janitor, supervisor.
+     */
     private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$");
+            Pattern.compile(
+                "^[a-zA-Z0-9._\\-]+\\.(admin|lecturer|janitor|supervisor)@egerton\\.ac\\.ke$",
+                Pattern.CASE_INSENSITIVE);
 
     /** Phone: optional leading +, digits, dashes, spaces, parentheses, 7–15 chars. */
     private static final Pattern PHONE_PATTERN =
@@ -32,9 +38,69 @@ public final class ValidationUtil {
 
     // ─── Email ────────────────────────────────────────────────
 
-    /** Returns {@code true} when {@code email} matches a valid email pattern. */
+    /**
+     * Returns {@code true} when {@code email} follows the Egerton University
+     * format {@code name.role@egerton.ac.ke} (case-insensitive).
+     */
     public static boolean isValidEmail(String email) {
         return isNotBlank(email) && EMAIL_PATTERN.matcher(email.trim()).matches();
+    }
+
+    /**
+     * Returns {@code true} when the role embedded in the email address matches
+     * the supplied {@code role} string (case-insensitive).
+     * <p>Assumes the email has already been validated with {@link #isValidEmail}.
+     * Example: {@code isEmailRoleMatch("john.janitor@egerton.ac.ke", "janitor")} → {@code true}.
+     *
+     * @param email   a valid Egerton email address
+     * @param role    the role string to compare against (e.g. "janitor", "admin")
+     */
+    public static boolean isEmailRoleMatch(String email, String role) {
+        if (isBlank(email) || isBlank(role)) return false;
+        // Extract the segment between the last '.' before '@' and '@'
+        String lower = email.trim().toLowerCase();
+        int atIdx = lower.indexOf('@');
+        if (atIdx < 0) return false;
+        int dotIdx = lower.lastIndexOf('.', atIdx - 1);
+        if (dotIdx < 0) return false;
+        String emailRole = lower.substring(dotIdx + 1, atIdx);
+        return emailRole.equals(role.trim().toLowerCase());
+    }
+
+    /**
+     * Returns the staff ID prefix for the given role, or {@code null} for roles
+     * that do not use a staff ID (e.g. lecturer).
+     *
+     * @param role  role string: "janitor", "admin", or "supervisor"
+     * @return prefix string (e.g. {@code "JAN"}) or {@code null}
+     */
+    public static String getStaffIdPrefix(String role) {
+        if (isBlank(role)) return null;
+        switch (role.trim().toLowerCase()) {
+            case "janitor":    return "JAN";
+            case "admin":      return "ADM";
+            case "supervisor": return "SUP";
+            default:           return null;
+        }
+    }
+
+    /**
+     * Validates a staff ID for the given role.
+     * <ul>
+     *   <li>Janitor    → {@code JAN-YYYY-NNN}</li>
+     *   <li>Admin      → {@code ADM-YYYY-NNN}</li>
+     *   <li>Supervisor → {@code SUP-YYYY-NNN}</li>
+     * </ul>
+     * Returns {@code false} for roles that do not require a staff ID (e.g. lecturer).
+     *
+     * @param staffId  the staff ID string to validate
+     * @param role     the role string: "janitor", "admin", or "supervisor"
+     */
+    public static boolean isValidStaffId(String staffId, String role) {
+        if (isBlank(staffId)) return false;
+        String prefix = getStaffIdPrefix(role);
+        if (prefix == null) return false;
+        return staffId.trim().toUpperCase().matches(prefix + "-\\d{4}-\\d{3}");
     }
 
     // ─── Password ─────────────────────────────────────────────

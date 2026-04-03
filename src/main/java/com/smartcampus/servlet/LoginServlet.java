@@ -46,7 +46,7 @@ public class LoginServlet extends HttpServlet {
 
         // ─── Validation ──────────────────────────────────────────
         if (!ValidationUtil.isValidEmail(email)) {
-            req.setAttribute("error", "Please enter a valid email address.");
+            req.setAttribute("error", "Please enter a valid Egerton University email (e.g. name.role@egerton.ac.ke).");
             req.getRequestDispatcher("/index.jsp").forward(req, resp);
             return;
         }

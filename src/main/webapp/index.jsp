@@ -894,9 +894,9 @@
             return { valid: true };
         }
         function validateEmail(email) {
-            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const emailRegex = /^[a-zA-Z0-9._\-]+\.(admin|lecturer|janitor|supervisor)@egerton\.ac\.ke$/i;
             if (!email.trim()) return { valid: false, message: "Email address is required" };
-            if (!emailRegex.test(email)) return { valid: false, message: "Please enter a valid email address" };
+            if (!emailRegex.test(email)) return { valid: false, message: "Email must be in the format name.role@egerton.ac.ke (e.g. john.lecturer@egerton.ac.ke)" };
             return { valid: true };
         }
         function validatePhone(phone) {
