@@ -704,28 +704,28 @@
             <h2>Create Account</h2>
             <form id="registerForm" action="<%= ctx %>/register" method="post">
                 <div class="form-group">
-                    <label class="form-label"><i class="bi bi-person-fill"></i> Full Name <span class="required">*</span></label>
+                    <label for="regFullName" class="form-label"><i class="bi bi-person-fill"></i> Full Name <span class="required">*</span></label>
                     <input type="text" name="name" class="form-control" id="regFullName"
                            placeholder="e.g., Dr. John Doe"
-                           value="<%= regName %>" required>
+                           value="<%= regName %>" required autoComplete="username">
                     <div id="nameError" class="error-message text-danger" style="display:none;"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label"><i class="bi bi-envelope-fill"></i> Email Address <span class="required">*</span></label>
+                    <label for="regEmail" class="form-label"><i class="bi bi-envelope-fill"></i> Email Address <span class="required">*</span></label>
                     <input type="email" name="email" class="form-control" id="regEmail"
                            placeholder="name.role@egerton.ac.ke"
-                           value="<%= regEmail %>" required>
+                           value="<%= regEmail %>" required autoComplete="email">
                     <div id="emailError" class="error-message text-danger" style="display:none;"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label"><i class="bi bi-telephone-fill"></i> Phone Number <span class="required">*</span></label>
+                    <label for="regPhone" class="form-label"><i class="bi bi-telephone-fill"></i> Phone Number <span class="required">*</span></label>
                     <input type="tel" name="phone" class="form-control" id="regPhone"
                            placeholder="0712345678"
-                           value="<%= regPhone %>" required>
+                           value="<%= regPhone %>" required autoComplete="phone">
                     <div id="phoneError" class="error-message text-danger" style="display:none;"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label"><i class="bi bi-venus-mars"></i> Gender <span class="required">*</span></label>
+                    <label for="regGender" class="form-label"><i class="bi bi-venus-mars"></i> Gender <span class="required">*</span></label>
                     <select name="gender" class="form-select" id="regGender" required>
                         <option value="">Select Gender</option>
                         <option value="Male" <%= "Male".equals(regGender) ? "selected" : "" %>>Male</option>
@@ -735,7 +735,7 @@
                     <div id="genderError" class="error-message text-danger" style="display:none;"></div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label"><i class="bi bi-briefcase-fill"></i> Role <span class="required">*</span></label>
+                    <label for="regRole" class="form-label"><i class="bi bi-briefcase-fill"></i> Role <span class="required">*</span></label>
                     <select name="role" class="form-select" id="regRole" required onchange="updateRoleFields()">
                         <option value="lecturer" <%= "lecturer".equals(regRole) ? "selected" : "" %>>Lecturer</option>
                         <option value="janitor" <%= "janitor".equals(regRole) ? "selected" : "" %>>Janitor</option>
@@ -745,18 +745,18 @@
                 </div>
                 <div id="roleSpecificFields" class="role-fields-section"></div>
                 <div class="form-group">
-                    <label class="form-label"><i class="bi bi-lock-fill"></i> Password <span class="required">*</span></label>
+                    <label for="regPassword" class="form-label"><i class="bi bi-lock-fill"></i> Password <span class="required">*</span></label>
                     <input type="password" name="password" class="form-control" id="regPassword"
-                           placeholder="Create a strong password" required onkeyup="checkPasswordStrength()">
+                           placeholder="Create a strong password" required autoComplete="new-password" onkeyup="checkPasswordStrength()">
                     <div class="password-strength">
                         <div class="strength-bar" id="strengthBar" style="width:0%;background:#ddd;"></div>
                         <small id="strengthText" class="text-muted"></small>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label"><i class="bi bi-shield-lock-fill"></i> Confirm Password <span class="required">*</span></label>
+                    <label for="regConfirmPassword" class="form-label"><i class="bi bi-shield-lock-fill"></i> Confirm Password <span class="required">*</span></label>
                     <input type="password" name="confirmPassword" class="form-control" id="regConfirmPassword"
-                           placeholder="Confirm your password" required>
+                           placeholder="Confirm your password" required autoComplete="new-password">
                     <div id="confirmPasswordError" class="error-message text-danger" style="display:none;"></div>
                 </div>
                 <div class="terms-check">
@@ -931,12 +931,12 @@
             let html = '<div class="role-fields-title"><i class="bi bi-briefcase"></i> Role-Specific Information</div>';
             if (role === 'lecturer') {
                 html += '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-door-closed"></i> Office Number <span class="required">*</span></label>'
+                    + '<label for="lecturerOffice" class="form-label"><i class="bi bi-door-closed"></i> Office Number <span class="required">*</span></label>'
                     + '<input type="text" name="officeNumber" class="form-control" id="lecturerOffice" placeholder="e.g., A101, B202">'
                     + '<div id="officeError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>'
                     + '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-diagram-3"></i> Wing <span class="required">*</span></label>'
+                    + '<label for="lecturerWing" class="form-label"><i class="bi bi-diagram-3"></i> Wing <span class="required">*</span></label>'
                     + '<select name="wing" class="form-select" id="lecturerWing">'
                     + '<option value="">Select Wing</option>'
                     + '<option value="A">A Wing</option>'
@@ -947,18 +947,18 @@
                     + '<div id="wingError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>'
                     + '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-stack"></i> Floor <span class="required">*</span></label>'
+                    + '<label for="lecturerFloor" class="form-label"><i class="bi bi-stack"></i> Floor <span class="required">*</span></label>'
                     + '<input type="text" name="floor" class="form-control" id="lecturerFloor" placeholder="basement, groundfloor, first, second, third">'
                     + '<div id="floorError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>';
             } else if (role === 'janitor') {
                 html += '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-upc-scan"></i> Staff ID <span class="required">*</span></label>'
+                    + '<label for="janitorStaffId" class="form-label"><i class="bi bi-upc-scan"></i> Staff ID <span class="required">*</span></label>'
                     + '<input type="text" name="staffId" class="form-control" id="janitorStaffId" placeholder="e.g., JAN-2024-001">'
                     + '<div id="staffIdError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>'
                     + '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-tools"></i> Assigned Wing</label>'
+                    + '<label for="janitorWing" class="form-label"><i class="bi bi-tools"></i> Assigned Wing</label>'
                     + '<select name="wing" class="form-select" id="janitorWing">'
                     + '<option value="">Select Wing (Optional)</option>'
                     + '<option value="A">A Wing</option>'
@@ -970,12 +970,12 @@
                     + '</div>';
             } else if (role === 'supervisor') {
                 html += '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-upc-scan"></i> Staff ID <span class="required">*</span></label>'
+                    + '<label for="supervisorStaffId" class="form-label"><i class="bi bi-upc-scan"></i> Staff ID <span class="required">*</span></label>'
                     + '<input type="text" name="staffId" class="form-control" id="supervisorStaffId" placeholder="e.g., SUP-2024-001">'
                     + '<div id="supStaffIdError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>'
                     + '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-diagram-3"></i> Supervisory Wing</label>'
+                    + '<label for="supervisorWing" class="form-label"><i class="bi bi-diagram-3"></i> Supervisory Wing</label>'
                     + '<select name="wing" class="form-select" id="supervisorWing">'
                     + '<option value="">Select Wing (Optional)</option>'
                     + '<option value="A">A Wing</option>'
@@ -987,12 +987,12 @@
                     + '</div>';
             } else if (role === 'admin') {
                 html += '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-upc-scan"></i> Staff ID <span class="required">*</span></label>'
+                    + '<label for="adminStaffId" class="form-label"><i class="bi bi-upc-scan"></i> Staff ID <span class="required">*</span></label>'
                     + '<input type="text" name="staffId" class="form-control" id="adminStaffId" placeholder="e.g., ADM-2024-001">'
                     + '<div id="adminStaffIdError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>'
                     + '<div class="form-group">'
-                    + '<label class="form-label"><i class="bi bi-building"></i> Department</label>'
+                    + '<label for="adminDept" class="form-label"><i class="bi bi-building"></i> Department</label>'
                     + '<input type="text" name="department" class="form-control" id="adminDept" placeholder="e.g., ICT Department">'
                     + '</div>';
             }
