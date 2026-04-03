@@ -2,10 +2,812 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=lecturer/dashboard">
-    <title>SmartCampus | Lecturer Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecturer Dashboard | SmartCampus - Egerton University</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --egerton-green: #00A651;
+            --egerton-green-dark: #008a43;
+            --egerton-green-deep: #007624;
+            --egerton-gold: #D2AC67;
+            --bg-light: #F8F9FC;
+            --card-white: #ffffff;
+            --text-dark: #1F2A3A;
+            --text-muted: #5a6e8a;
+            --border-color: #e9ecef;
+            --sidebar-bg: #1a472a;
+            --sidebar-hover: #2a5a3a;
+            --high-intensity-bg: #fee2e2;
+            --high-intensity-color: #e74c3c;
+            --low-intensity-bg: #e0f2e9;
+            --low-intensity-color: #00A651;
+        }
+
+        body {
+            background: var(--bg-light);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--egerton-green-deep) 100%);
+            min-height: 100vh;
+            color: white;
+            box-shadow: 2px 0 12px rgba(0,0,0,0.08);
+        }
+
+        .sidebar-brand {
+            padding: 1.5rem 1.2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-brand h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.25rem;
+        }
+
+        .sidebar-brand p {
+            font-size: 0.7rem;
+            opacity: 0.8;
+        }
+
+        .nav-link-custom {
+            color: rgba(255,255,255,0.85);
+            padding: 0.7rem 1.2rem;
+            margin: 0.2rem 0.8rem;
+            border-radius: 12px;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .nav-link-custom:hover {
+            background: var(--sidebar-hover);
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link-custom.active {
+            background: var(--egerton-gold);
+            color: var(--egerton-green-deep);
+            font-weight: 600;
+        }
+
+        .nav-link-custom i {
+            font-size: 1.2rem;
+            width: 24px;
+        }
+
+        .main-content {
+            padding: 1.5rem 2rem;
+        }
+
+        .welcome-header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .welcome-header p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .info-card {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s;
+            text-align: center;
+        }
+
+        .info-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .info-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, rgba(0,166,81,0.1), rgba(210,172,103,0.1));
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.8rem;
+        }
+
+        .info-icon i {
+            font-size: 1.8rem;
+            color: var(--egerton-green);
+        }
+
+        .info-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-card p {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            margin-bottom: 0;
+        }
+
+        .intensity-high {
+            background: var(--high-intensity-bg);
+            color: var(--high-intensity-color);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .intensity-low {
+            background: var(--low-intensity-bg);
+            color: var(--low-intensity-color);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-badge {
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .checkin-card {
+            background: linear-gradient(135deg, var(--egerton-green), var(--egerton-green-dark));
+            border-radius: 20px;
+            padding: 1.2rem;
+            color: white;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-checkin {
+            background: white;
+            color: var(--egerton-green);
+            border: none;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .btn-checkin:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-checkin:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .tasks-container {
+            background: var(--card-white);
+            border-radius: 20px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            border: 1px solid var(--border-color);
+        }
+
+        .tasks-header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.8rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .tasks-header h5 {
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.2s;
+        }
+
+        .task-item:last-child {
+            border-bottom: none;
+        }
+
+        .task-checkbox {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: var(--egerton-green);
+        }
+
+        .task-checkbox:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .task-content {
+            flex: 1;
+        }
+
+        .task-title {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .task-status {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .report-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            font-size: 0.7rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+
+        .report-btn:hover {
+            background: #fee2e2;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+
+        .custom-toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-custom .modal-content {
+            border-radius: 24px;
+            border: none;
+        }
+
+        .modal-custom .modal-header {
+            background: linear-gradient(135deg, var(--egerton-green-dark), var(--egerton-green));
+            color: white;
+            border-radius: 24px 24px 0 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                min-height: auto;
+            }
+            .main-content {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>Redirecting to <a href="lecturer/dashboard">lecturer dashboard</a>...</p>
+<div class="container-fluid px-0">
+    <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="col-md-3 col-lg-2 sidebar">
+            <div class="sidebar-brand">
+                <h3>SmartCampus</h3>
+                <p>Egerton University</p>
+            </div>
+            <nav class="nav flex-column">
+                <a class="nav-link-custom active" data-section="dashboard">
+                    <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+                <a class="nav-link-custom" data-section="reports">
+                    <i class="bi bi-flag"></i> My Reports
+                </a>
+                <hr class="mx-3 my-3" style="border-color: rgba(255,255,255,0.2);">
+                <a href="index.html" class="nav-link-custom">
+                    <i class="bi bi-box-arrow-left"></i> Sign Out
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10 main-content">
+            <div id="dashboardSection">
+                <!-- Welcome Header -->
+                <div class="welcome-header d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1>Welcome, Prof. Sarah Wanjiku</h1>
+                        <p>Lecturer Dashboard — Science Complex</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-light text-dark p-2 shadow-sm">
+                            <i class="bi bi-person-circle"></i> Office A101 | swanjiku@egerton.ac.ke
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Stats Row -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-icon"><i class="bi bi-building"></i></div>
+                            <h3>A101</h3>
+                            <p>My Office</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-icon"><i class="bi bi-droplet"></i></div>
+                            <div id="intensityDisplay"></div>
+                            <p>Cleaning Intensity</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Check-in Card -->
+                <div class="checkin-card">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <i class="bi bi-check2-circle"></i>
+                            <h4 class="mt-2">Daily Check-in</h4>
+                            <p id="checkinMessage"></p>
+                        </div>
+                        <div class="col-4 text-end">
+                            <button class="btn-checkin" onclick="handleCheckIn()" id="checkinBtn">
+                                <i class="bi bi-calendar-check"></i> Check In
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Cleaning Tasks -->
+                <div class="tasks-container">
+                    <div class="tasks-header d-flex justify-content-between align-items-center">
+                        <h5><i class="bi bi-brush text-success"></i> Today's Cleaning Tasks</h5>
+                        <span id="tasksHeaderBadge"></span>
+                    </div>
+                    <div id="tasksList"></div>
+                    <div class="mt-3 pt-2 text-center" id="taskProgress"></div>
+                </div>
+            </div>
+
+            <!-- Reports Section -->
+            <div id="reportsSection" style="display: none;">
+                <div class="tasks-container">
+                    <div class="tasks-header">
+                        <h5><i class="bi bi-flag text-success"></i> My Dissatisfaction Reports</h5>
+                        <p class="text-muted small">Reports sent to supervisor when you uncheck completed tasks</p>
+                    </div>
+                    <div id="reportsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Modal -->
+<div class="modal fade modal-custom" id="reportModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-flag"></i> Report Issue</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportForm">
+                    <input type="hidden" id="reportTaskId">
+                    <input type="hidden" id="reportTaskName">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Task</label>
+                        <input type="text" class="form-control" id="reportTaskDisplay" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Reason for Dissatisfaction</label>
+                        <textarea class="form-control" id="reportReason" rows="3" placeholder="Please explain why you're unsatisfied with this task..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Additional Notes</label>
+                        <input type="text" class="form-control" id="reportNotes" placeholder="Any additional comments">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitReport()">Submit Report</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ============= DATA =============
+    // NOT CHECKED IN = Office is clean = Low intensity = Dusting only
+    const lowIntensityTasks = [
+        { id: 2, name: "Dusting", completed: false, reported: false }
+    ];
+    
+    // CHECKED IN = Office is dirty = HIGH INTENSITY = ALL 4 TASKS
+    const highIntensityTasks = [
+        { id: 1, name: "Mopping", completed: false, reported: false },
+        { id: 2, name: "Dusting", completed: false, reported: false },
+        { id: 3, name: "Emptying Bins", completed: false, reported: false },
+        { id: 4, name: "Replenishing Stationery", completed: false, reported: false }
+    ];
+    
+    let currentTasks = [];
+    let checkedIn = false;
+    let reports = [];
+
+    function showToast(message, type = 'success') {
+        const toastDiv = document.createElement('div');
+        toastDiv.className = 'custom-toast';
+        toastDiv.style.backgroundColor = type === 'success' ? '#00A651' : (type === 'error' ? '#dc3545' : '#17a2b8');
+        toastDiv.style.color = 'white';
+        
+        let icon = '';
+        if (type === 'success') icon = '<i class="bi bi-check-circle-fill"></i>';
+        else if (type === 'error') icon = '<i class="bi bi-exclamation-triangle-fill"></i>';
+        else icon = '<i class="bi bi-info-circle-fill"></i>';
+        
+        toastDiv.innerHTML = `${icon}<span>${message}</span>`;
+        document.body.appendChild(toastDiv);
+        
+        setTimeout(() => {
+            toastDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toastDiv.remove(), 300);
+        }, 3000);
+        
+        toastDiv.onclick = () => {
+            toastDiv.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => toastDiv.remove(), 300);
+        };
+    }
+
+    function updateIntensity() {
+        const intensityDisplay = document.getElementById('intensityDisplay');
+        const tasksHeaderBadge = document.getElementById('tasksHeaderBadge');
+        
+        if (!checkedIn) {
+            intensityDisplay.innerHTML = '<span class="intensity-low">Low Intensity</span>';
+            tasksHeaderBadge.innerHTML = '<span class="intensity-low">Low Intensity (Dusting Only)</span>';
+        } else {
+            intensityDisplay.innerHTML = '<span class="intensity-high">High Intensity</span>';
+            tasksHeaderBadge.innerHTML = '<span class="intensity-high">High Intensity (Full Cleaning - All 4 Tasks)</span>';
+        }
+    }
+
+    function updateCheckinStatus() {
+        const checkinMessage = document.getElementById('checkinMessage');
+        const checkinBtn = document.getElementById('checkinBtn');
+        
+        if (checkedIn) {
+            const allCompleted = currentTasks.every(t => t.completed);
+            if (allCompleted) {
+                checkinMessage.innerHTML = '✅ Checked in — All cleaning tasks completed! Office is now clean.';
+            } else {
+                checkinMessage.innerHTML = '✅ Checked in — Office is dirty, intensive cleaning required (All 4 tasks)';
+            }
+            checkinBtn.innerHTML = '<i class="bi bi-check-circle"></i> Checked In';
+            checkinBtn.disabled = true;
+        } else {
+            checkinMessage.innerHTML = '✓ Not checked in — Office is clean, minimal cleaning needed (Dusting only)';
+            checkinBtn.innerHTML = '<i class="bi bi-calendar-check"></i> Check In (Office Dirty)';
+            checkinBtn.disabled = false;
+        }
+    }
+
+    function renderTasks() {
+        const container = document.getElementById('tasksList');
+        const taskProgress = document.getElementById('taskProgress');
+        
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        if (!currentTasks || currentTasks.length === 0) {
+            container.innerHTML = '<p class="text-center text-muted py-4">No tasks scheduled</p>';
+            taskProgress.innerHTML = '';
+            return;
+        }
+        
+        // Render each task
+        currentTasks.forEach(task => {
+            const taskDiv = document.createElement('div');
+            taskDiv.className = 'task-item';
+            
+            const canCheck = checkedIn;
+            const isChecked = task.completed;
+            
+            taskDiv.innerHTML = `
+                <input type="checkbox" class="task-checkbox" data-id="${task.id}" 
+                    ${isChecked ? 'checked' : ''} 
+                    ${!canCheck ? 'disabled' : ''}
+                    onchange="toggleTask(${task.id})">
+                <div class="task-content">
+                    <p class="task-title">${task.name}</p>
+                    <p class="task-status">${isChecked ? 'Completed by Janitor' : 'Pending'}</p>
+                </div>
+                <div>
+                    ${isChecked ? 
+                        `<button class="report-btn" onclick="openReportModal(${task.id}, '${task.name}')" ${!canCheck ? 'disabled' : ''}>
+                            <i class="bi bi-flag"></i> Report Issue
+                        </button>` : 
+                        '<span class="text-muted small">Awaiting completion</span>'
+                    }
+                </div>
+            `;
+            container.appendChild(taskDiv);
+        });
+        
+        // Update progress
+        const completedCount = currentTasks.filter(t => t.completed).length;
+        const totalCount = currentTasks.length;
+        
+        if (checkedIn) {
+            if (totalCount === 4) {
+                taskProgress.innerHTML = `<small class="text-muted">${completedCount}/4 tasks completed by janitor</small>`;
+                if (completedCount === 4) {
+                    taskProgress.innerHTML += '<br><small class="text-success">✓ All cleaning tasks completed! Office is now clean.</small>';
+                } else {
+                    taskProgress.innerHTML += '<br><small class="text-muted">High intensity cleaning in progress</small>';
+                }
+            } else {
+                taskProgress.innerHTML = `<small class="text-muted">${completedCount}/${totalCount} tasks completed</small>`;
+            }
+        } else {
+            taskProgress.innerHTML = '<small class="text-muted">Office is clean. Check in only when office becomes dirty.</small>';
+        }
+    }
+
+    function toggleTask(taskId) {
+        const task = currentTasks.find(t => t.id === taskId);
+        if (task && checkedIn) {
+            const newState = !task.completed;
+            
+            if (newState === false && task.completed === true) {
+                // Unchecking a completed task - opens report modal
+                document.querySelector(`.task-checkbox[data-id="${taskId}"]`).checked = true;
+                openReportModal(taskId, task.name);
+                return;
+            }
+            
+            task.completed = newState;
+            
+            if (newState) {
+                showToast(`✓ ${task.name} marked as completed by janitor!`, 'success');
+            }
+            
+            renderTasks();
+            updateCheckinStatus();
+            saveState();
+        }
+    }
+
+    function openReportModal(taskId, taskName) {
+        const task = currentTasks.find(t => t.id === taskId);
+        if (task) {
+            document.getElementById('reportTaskId').value = taskId;
+            document.getElementById('reportTaskName').value = taskName;
+            document.getElementById('reportTaskDisplay').value = taskName;
+            document.getElementById('reportReason').value = '';
+            document.getElementById('reportNotes').value = '';
+            
+            const modal = new bootstrap.Modal(document.getElementById('reportModal'));
+            modal.show();
+        }
+    }
+    
+    function submitReport() {
+        const taskId = parseInt(document.getElementById('reportTaskId').value);
+        const taskName = document.getElementById('reportTaskName').value;
+        const reason = document.getElementById('reportReason').value;
+        const notes = document.getElementById('reportNotes').value;
+        
+        if (!reason) {
+            showToast('Please provide a reason for your dissatisfaction', 'error');
+            return;
+        }
+        
+        const task = currentTasks.find(t => t.id === taskId);
+        if (task) {
+            task.reported = true;
+            
+            const report = {
+                id: Date.now(),
+                taskName: taskName,
+                reason: reason,
+                notes: notes,
+                date: new Date().toLocaleString(),
+                status: 'Pending Review'
+            };
+            reports.unshift(report);
+            
+            showToast(`Report sent to supervisor regarding "${taskName}"`, 'info');
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('reportModal'));
+            modal.hide();
+            
+            saveState();
+            renderTasks();
+            renderReports();
+        }
+    }
+    
+    function handleCheckIn() {
+        if (!checkedIn) {
+            checkedIn = true;
+            // HIGH INTENSITY = ALL 4 TASKS - Fresh copy
+            currentTasks = JSON.parse(JSON.stringify(highIntensityTasks));
+            
+            updateIntensity();
+            updateCheckinStatus();
+            renderTasks();
+            
+            showToast('✓ Checked in! High intensity cleaning scheduled (All 4 tasks).', 'success');
+            saveState();
+        }
+    }
+    
+    function renderReports() {
+        const container = document.getElementById('reportsList');
+        if (!container) return;
+        
+        if (reports.length === 0) {
+            container.innerHTML = '<p class="text-center text-muted py-4">No reports submitted yet</p>';
+            return;
+        }
+        
+        container.innerHTML = '';
+        reports.forEach(report => {
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'task-item';
+            reportDiv.innerHTML = `
+                <div class="task-content">
+                    <p class="task-title"><strong>${report.taskName}</strong> - ${report.date}</p>
+                    <p class="text-muted small mb-1"><strong>Reason:</strong> ${report.reason}</p>
+                    ${report.notes ? `<p class="text-muted small"><strong>Notes:</strong> ${report.notes}</p>` : ''}
+                    <span class="badge bg-warning text-dark">${report.status}</span>
+                </div>
+            `;
+            container.appendChild(reportDiv);
+        });
+    }
+    
+    function saveState() {
+        const state = {
+            checkedIn: checkedIn,
+            currentTasks: currentTasks,
+            reports: reports
+        };
+        localStorage.setItem('lecturerDashboardState', JSON.stringify(state));
+    }
+    
+    function loadState() {
+        const saved = localStorage.getItem('lecturerDashboardState');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                checkedIn = state.checkedIn || false;
+                
+                // Critical fix: Ensure tasks match the intensity level
+                if (checkedIn) {
+                    // If checked in, should have 4 tasks (high intensity)
+                    if (!state.currentTasks || state.currentTasks.length !== 4) {
+                        currentTasks = JSON.parse(JSON.stringify(highIntensityTasks));
+                    } else {
+                        currentTasks = state.currentTasks;
+                    }
+                } else {
+                    // If not checked in, should have 1 task (low intensity)
+                    if (!state.currentTasks || state.currentTasks.length !== 1) {
+                        currentTasks = JSON.parse(JSON.stringify(lowIntensityTasks));
+                    } else {
+                        currentTasks = state.currentTasks;
+                    }
+                }
+                reports = state.reports || [];
+            } catch(e) {
+                // Error loading, set defaults
+                resetToDefault();
+            }
+        } else {
+            resetToDefault();
+        }
+        
+        updateIntensity();
+        updateCheckinStatus();
+        renderTasks();
+        renderReports();
+    }
+    
+    function resetToDefault() {
+        checkedIn = false;
+        currentTasks = JSON.parse(JSON.stringify(lowIntensityTasks));
+        reports = [];
+    }
+    
+    // Clear localStorage helper (for testing)
+    function clearSavedState() {
+        localStorage.removeItem('lecturerDashboardState');
+        resetToDefault();
+        updateIntensity();
+        updateCheckinStatus();
+        renderTasks();
+        renderReports();
+        showToast('State reset to default', 'info');
+    }
+    
+    // Navigation
+    document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
+        link.addEventListener('click', () => {
+            const section = link.getAttribute('data-section');
+            
+            document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+            link.classList.add('active');
+            
+            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+            document.getElementById('reportsSection').style.display = section === 'reports' ? 'block' : 'none';
+            
+            if (section === 'reports') {
+                renderReports();
+            }
+        });
+    });
+    
+    // Initialize
+    loadState();
+    
+    // Expose functions globally
+    window.toggleTask = toggleTask;
+    window.handleCheckIn = handleCheckIn;
+    window.openReportModal = openReportModal;
+    window.submitReport = submitReport;
+    window.clearSavedState = clearSavedState; // For testing
+</script>
 </body>
 </html>
