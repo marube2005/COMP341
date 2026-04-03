@@ -24,6 +24,7 @@
     <a href="<%= ctx %>/facilities"           class="nav-link-custom <%= "facilities".equals(activePage) ? "active" : "" %>"><i class="bi bi-building-fill"></i> Facilities</a>
     <% } else if ("janitor".equals(userRole)) { %>
     <a href="<%= ctx %>/janitor/dashboard"   class="nav-link-custom <%= "dashboard".equals(activePage) ? "active" : "" %>"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="#" data-section="history"       class="nav-link-custom"><i class="bi bi-clock-history"></i> Completed History</a>
     <a href="<%= ctx %>/cleaning-tasks"      class="nav-link-custom <%= "cleaning".equals(activePage) ? "active" : "" %>"><i class="bi bi-bucket-fill"></i> My Tasks</a>
     <% } else if ("supervisor".equals(userRole)) { %>
     <a href="<%= ctx %>/supervisor/dashboard" class="nav-link-custom <%= "dashboard".equals(activePage) ? "active" : "" %>"><i class="bi bi-speedometer2"></i> Dashboard</a>
