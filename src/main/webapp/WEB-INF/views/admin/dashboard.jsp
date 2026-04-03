@@ -150,7 +150,7 @@
       <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <div>
           <h1>Admin Dashboard</h1>
-          <p>Welcome back, <%= currentUser.getName() %> &nbsp;|&nbsp; Campus Management Overview</p>
+          <p>Science Complex Management Overview</p>
         </div>
         <span class="badge bg-light text-dark p-2 shadow-sm">
           <i class="bi bi-person-circle"></i> <%= currentUser.getName() %>
@@ -224,7 +224,7 @@
             <table class="table table-custom table-hover">
               <thead>
                 <tr>
-                  <th>#</th><th>Office</th><th>Wing</th><th>Capacity</th><th>Status</th><th>Actions</th>
+                  <th>Office</th><th>Wing</th><th>Type</th><th>Capacity</th><th>Status</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,9 +233,9 @@
                 <% } else {
                    for (Facility f : allFacilities) { %>
                 <tr>
-                  <td><strong><%= f.getId() %></strong></td>
                   <td><strong><%= f.getName() %></strong></td>
                   <td><span class="badge bg-secondary bg-opacity-10 text-dark"><%= f.getLocation() %></span></td>
+                  <td><span class="badge-lecturer text-capitalize"><%= f.getFacilityType() != null ? f.getFacilityType().name() : "—" %></span></td>
                   <td><%= f.getCapacity() > 0 ? f.getCapacity() : "—" %></td>
                   <td><span class="badge rounded-pill badge-status-<%= f.getStatus().name() %> text-capitalize px-3"><%= f.getStatus().name() %></span></td>
                   <td>
@@ -278,11 +278,11 @@
           <div class="table-responsive">
             <table class="table table-custom table-hover">
               <thead>
-                <tr><th>Name</th><th>Email</th><th>Role</th><th>Department</th><th>Status</th></tr>
+                <tr><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Staff ID</th><th>Registered</th></tr>
               </thead>
               <tbody>
                 <% if (allUsers.isEmpty()) { %>
-                <tr><td colspan="5" class="text-center text-muted py-4">No users found.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-4">No users found.</td></tr>
                 <% } else {
                    for (User u : allUsers) {
                        String roleClass = "admin".equals(u.getRole().name()) ? "badge-admin"
@@ -293,14 +293,9 @@
                   <td><strong><%= u.getName() %></strong></td>
                   <td><%= u.getEmail() %></td>
                   <td><span class="<%= roleClass %> text-capitalize"><%= u.getRole().name() %></span></td>
-                  <td><%= u.getDepartment() != null ? u.getDepartment() : "—" %></td>
-                  <td>
-                    <% if (u.isActive()) { %>
-                    <span class="badge bg-success-subtle text-success border border-success-subtle">Active</span>
-                    <% } else { %>
-                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">Inactive</span>
-                    <% } %>
-                  </td>
+                  <td><%= u.getPhone() != null ? u.getPhone() : "—" %></td>
+                  <td><small class="text-muted"><%= u.getStaffId() != null ? u.getStaffId() : "—" %></small></td>
+                  <td><small><%= u.getCreatedAt() != null ? u.getCreatedAt().toLocalDate() : "—" %></small></td>
                 </tr>
                 <% } } %>
               </tbody>
