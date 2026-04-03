@@ -1,12 +1,12 @@
 package com.smartcampus.servlet;
 
 import com.smartcampus.dao.FacilityDAO;
-import com.smartcampus.dao.MaintenanceRequestDAO;
+//import com.smartcampus.dao.MaintenanceRequestDAO;
 import com.smartcampus.dao.UserDAO;
 import com.smartcampus.dao.CleaningTaskDAO;
 import com.smartcampus.model.CleaningTask;
 import com.smartcampus.model.Facility;
-import com.smartcampus.model.MaintenanceRequest;
+//import com.smartcampus.model.MaintenanceRequest;
 import com.smartcampus.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
@@ -28,7 +28,7 @@ public class DashboardServlet extends HttpServlet {
 
     private final UserDAO                userDAO   = new UserDAO();
     private final FacilityDAO            facDAO    = new FacilityDAO();
-    private final MaintenanceRequestDAO  mrDAO     = new MaintenanceRequestDAO();
+    //private final MaintenanceRequestDAO  mrDAO     = new MaintenanceRequestDAO();
     private final CleaningTaskDAO        ctDAO     = new CleaningTaskDAO();
 
     @Override
@@ -57,24 +57,24 @@ public class DashboardServlet extends HttpServlet {
                     jspPath = "/WEB-INF/views/admin/dashboard.jsp";
                     break;
                 case lecturer:
-                    req.setAttribute("myRequests",    mrDAO.findByReporter(user.getId()));
-                    req.setAttribute("facilities",    facDAO.findByStatus(Facility.Status.available));
-                    req.setAttribute("pendingCount",  mrDAO.countByStatus(MaintenanceRequest.Status.pending));
+                     // req.setAttribute("myRequests",    mrDAO.findByReporter(user.getId()));
+                      req.setAttribute("facilities",    facDAO.findByStatus(Facility.Status.available));
+//                    req.setAttribute("pendingCount",  mrDAO.countByStatus(MaintenanceRequest.Status.pending));
                     jspPath = "/WEB-INF/views/lecturer/dashboard.jsp";
                     break;
                 case janitor:
                     req.setAttribute("myTasks",       ctDAO.findByJanitor(user.getId()));
                     req.setAttribute("todayCount",    ctDAO.countTodayByJanitor(user.getId()));
-                    req.setAttribute("assignedRequests", mrDAO.findByAssignee(user.getId()));
+                    //req.setAttribute("assignedRequests", mrDAO.findByAssignee(user.getId()));
                     jspPath = "/WEB-INF/views/janitor/dashboard.jsp";
                     break;
                 case supervisor:
-                    req.setAttribute("allRequests",   mrDAO.findAll());
+                   // req.setAttribute("allRequests",   mrDAO.findAll());
                     req.setAttribute("allTasks",      ctDAO.findAll());
                     req.setAttribute("janitors",      userDAO.findByRole(User.Role.janitor));
-                    req.setAttribute("pendingCount",  mrDAO.countByStatus(MaintenanceRequest.Status.pending));
-                    req.setAttribute("inProgressCount", mrDAO.countByStatus(MaintenanceRequest.Status.in_progress));
-                    req.setAttribute("resolvedCount", mrDAO.countByStatus(MaintenanceRequest.Status.resolved));
+                    //req.setAttribute("pendingCount",  mrDAO.countByStatus(MaintenanceRequest.Status.pending));
+                    //req.setAttribute("inProgressCount", mrDAO.countByStatus(MaintenanceRequest.Status.in_progress));
+                    //req.setAttribute("resolvedCount", mrDAO.countByStatus(MaintenanceRequest.Status.resolved));
                     jspPath = "/WEB-INF/views/supervisor/dashboard.jsp";
                     break;
                 default:
