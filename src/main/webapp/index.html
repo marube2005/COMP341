@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>SmartCampus | Egerton University - Facility Management</title>
+    <title>SmartCampus | Egerton University - Facility Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -489,12 +489,12 @@
     <div class="main-container">
         <div class="header-section">
             <h1>SmartCampus</h1>
-            <p>Facility Management — Egerton University</p>
+            <p>Facility Management System — Egerton University</p>
         </div>
 
         <div class="auth-tabs">
             <button class="tab-btn active" onclick="switchTab('signin')">Sign In</button>
-            <button class="tab-btn" onclick="switchTab('signup')">Create Account</button>
+            <button class="tab-btn" onclick="switchTab('signup')">Sign Up</button>
         </div>
 
         <!-- Sign In Form -->
@@ -529,7 +529,7 @@
             <form id="registerForm">
                 <div class="form-group">
                     <label class="form-label"><i class="bi bi-person-fill"></i> Full Name <span class="required">*</span></label>
-                    <input type="text" class="form-control" id="regFullName" placeholder="e.g., Dr. John Doe" required>
+                    <input type="text" class="form-control" id="regFullName" placeholder="e.g., Dr. Karl Mikes" required>
                     <div id="nameError" class="error-message text-danger" style="display: none;"></div>
                 </div>
                 <div class="form-group">
@@ -607,13 +607,7 @@
             "https://neathygiene.co.ke/images/1.jpg"
         ];
         
-        const fallbackImages = [
-            "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1600&h=900&fit=crop",
-            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&h=900&fit=crop",
-            "https://images.unsplash.com/photo-1562774053-701939374585?w=1600&h=900&fit=crop",
-            "https://images.unsplash.com/photo-1541829070764-84a7f30dd3f3?w=1600&h=900&fit=crop"
-        ];
-        
+    
         let currentSlideIndex = 0;
         let slideInterval;
         let slides = [];
@@ -693,17 +687,7 @@
             return { valid: true, message: "" };
         }
         
-        // Floor validation: basement, groundfloor, first, second, third
-        function validateFloor(floorValue) {
-            const validFloors = ["basement", "groundfloor", "first", "second", "third"];
-            const floorLower = floorValue.toString().toLowerCase().trim();
-            if (validFloors.includes(floorLower)) return { valid: true, message: "", value: floorLower };
-            if (!isNaN(floorValue) && parseInt(floorValue) >= 0 && parseInt(floorValue) <= 3) {
-                const floorMap = { 0: "groundfloor", 1: "first", 2: "second", 3: "third" };
-                return { valid: true, message: "", value: floorMap[parseInt(floorValue)] };
-            }
-            return { valid: false, message: "Floor must be: basement, groundfloor, first, second, or third" };
-        }
+       
         
         // Staff ID validation
         function validateStaffId(staffId, prefix) {
@@ -824,11 +808,18 @@
                         </select>
                         <div id="wingError" class="error-message text-danger" style="display: none;"></div>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label"><i class="bi bi-stack"></i> Floor <span class="required">*</span></label>
-                        <input type="text" class="form-control" id="lecturerFloor" placeholder="basement, groundfloor, first, second, third" required>
-                        <div id="floorError" class="error-message text-danger" style="display: none;"></div>
-                    </div>
+                   <div class="form-group">
+    <label class="form-label"><i class="bi bi-stack"></i> Floor <span class="required">*</span></label>
+    <select class="form-control" id="lecturerFloor" required>
+        <option value="" disabled selected>Select a floor</option>
+        <option value="basement">Basement</option>
+        <option value="groundfloor">Ground Floor</option>
+        <option value="first">First Floor</option>
+        <option value="second">Second Floor</option>
+        <option value="third">Third Floor</option>
+    </select>
+    <div id="floorError" class="error-message text-danger" style="display: none;"></div>
+</div>
                 `;
                 
                 // Add real-time validation for lecturer fields
