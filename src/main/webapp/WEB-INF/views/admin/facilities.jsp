@@ -17,6 +17,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facilities | SmartCampus</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,9 +25,9 @@
     <style>
         :root { --egerton-green:#00A651; --egerton-green-dark:#008a43; --egerton-gold:#D2AC67;
                 --sidebar-bg:#1a472a; --sidebar-hover:#2a5a3a; }
-        body { background:#F8F9FC; font-family:'Inter',sans-serif; }
+        body { background:#F8F9FC; font-family:'Inter',sans-serif; overflow-x:hidden; }
         .sidebar { background:linear-gradient(180deg,var(--sidebar-bg) 0%,#007624 100%);
-                   min-height:100vh; color:white; position:relative; }
+                   min-height:100vh; color:white; }
         .nav-link-custom { color:rgba(255,255,255,.85); padding:.7rem 1.2rem; margin:.2rem .8rem;
                            border-radius:12px; transition:all .2s; font-weight:500; font-size:.9rem;
                            display:flex; align-items:center; gap:10px; text-decoration:none; }
@@ -39,6 +40,10 @@
         .badge-status-occupied    { background:#dbeafe; color:#1e40af; }
         .badge-status-maintenance { background:#fee2e2; color:#991b1b; }
         .badge-status-closed      { background:#f3f4f6; color:#374151; }
+        @media (max-width: 767.98px) {
+            .table-container { padding: 1rem 0.75rem; border-radius:12px; }
+            h1 { font-size:1.4rem !important; }
+        }
     </style>
 </head>
 <body>

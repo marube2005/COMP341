@@ -109,9 +109,12 @@
                         border-bottom: 1px solid var(--border-color); }
         .history-item:last-child { border-bottom: none; }
 
-        @media (max-width: 768px) {
-            .sidebar { min-height: auto; }
+        @media (max-width: 767.98px) {
             .main-content { padding: 1rem; }
+            .welcome-header h1 { font-size: 1.3rem; }
+            .stat-card { padding: 1rem; }
+            .office-card { padding: 1rem; }
+            .filter-buttons { flex-wrap: wrap; gap: 6px; }
         }
     </style>
 </head>

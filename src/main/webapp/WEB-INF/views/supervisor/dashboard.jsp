@@ -146,9 +146,12 @@
         .modal-custom .modal-header { background: linear-gradient(135deg, var(--egerton-green-dark), var(--egerton-green));
                                       color: white; border-radius: 24px 24px 0 0; }
 
-        @media (max-width: 768px) {
-            .sidebar { min-height: auto; }
+        @media (max-width: 767.98px) {
             .main-content { padding: 1rem; }
+            .welcome-header h1 { font-size: 1.3rem; }
+            .stat-card { padding: 1rem; }
+            .table-container { padding: 1rem 0.75rem; border-radius: 14px; }
+            .janitor-card { padding: 0.75rem; }
         }
     </style>
 </head>
