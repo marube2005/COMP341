@@ -111,6 +111,17 @@ public class CleaningTaskDAO {
         }
     }
 
+    /** Updates only the assigned janitor of a cleaning task. */
+    public boolean updateAssignedTo(int id, int janitorId) throws SQLException {
+        String sql = "UPDATE cleaning_tasks SET assigned_to=? WHERE id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, janitorId);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     /** Updates only the status of a cleaning task. */
     public boolean updateStatus(int id, CleaningTask.Status status) throws SQLException {
         String sql = "UPDATE cleaning_tasks SET status=? WHERE id=?";

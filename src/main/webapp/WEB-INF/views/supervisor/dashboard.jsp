@@ -15,8 +15,15 @@
     if (janitors == null) janitors = Collections.emptyList();
 
     @SuppressWarnings("unchecked")
+    List<Facility> facilities = (List<Facility>) request.getAttribute("facilities");
+    if (facilities == null) facilities = Collections.emptyList();
+
+    @SuppressWarnings("unchecked")
     List<JanitorReport> lecturerReports = (List<JanitorReport>) request.getAttribute("lecturerReports");
     if (lecturerReports == null) lecturerReports = Collections.emptyList();
+
+    String success  = request.getParameter("success");
+    String errorMsg = (String) request.getAttribute("error");
 
     long pendingCount = 0, inProgressCount = 0, completedCount = 0;
     for (CleaningTask t : allTasks) {
@@ -168,10 +175,31 @@
           <h1>Supervisor Dashboard</h1>
           <p>Monitor and manage cleaning operations</p>
         </div>
-        <span class="badge bg-light text-dark p-2 shadow-sm">
-          <i class="bi bi-person-circle"></i> Supervisor &nbsp;|&nbsp; <%= currentUser.getEmail() %>
-        </span>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#assignOfficeModal">
+            <i class="bi bi-plus-circle-fill me-1"></i> Assign Office
+          </button>
+          <span class="badge bg-light text-dark p-2 shadow-sm">
+            <i class="bi bi-person-circle"></i> Supervisor &nbsp;|&nbsp; <%= currentUser.getEmail() %>
+          </span>
+        </div>
       </div>
+
+      <% if (success != null) {
+           String successMsg = "assigned".equals(success) ? "Office assigned to janitor successfully."
+                             : "reassigned".equals(success) ? "Task reassigned successfully."
+                             : "Operation completed successfully."; %>
+      <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i><%= successMsg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <% } %>
+      <% if (errorMsg != null) { %>
+      <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><%= errorMsg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <% } %>
 
       <!-- Dashboard Section -->
       <div id="dashboardSection">
@@ -291,7 +319,7 @@
                     <button class="btn-reassign"
                       data-task-id="<%= t.getId() %>"
                       data-office-name="<%= t.getFacilityName() %>"
-                      data-current-janitor="<%= t.getAssignedToName() != null ? t.getAssignedToName() : "" %>">
+                      data-current-janitor-id="<%= t.getAssignedTo() %>">
                       <i class="bi bi-arrow-repeat"></i> Reassign
                     </button>
                   </td>
@@ -398,34 +426,83 @@
   </div>
 </div>
 
+<!-- Assign Office Modal -->
+<div class="modal fade modal-custom" id="assignOfficeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="<%= ctx %>/cleaning-tasks">
+        <input type="hidden" name="action" value="create">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-plus-circle-fill"></i> Assign Office for Cleaning</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Office / Facility *</label>
+            <select name="facilityId" class="form-select" required>
+              <option value="">-- Select Office --</option>
+              <% for (Facility f : facilities) { %>
+              <option value="<%= f.getId() %>"><%= f.getName() %></option>
+              <% } %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Assign To (Janitor) *</label>
+            <select name="janitorId" class="form-select" required>
+              <option value="">-- Select Janitor --</option>
+              <% for (User j : janitors) { %>
+              <option value="<%= j.getId() %>"><%= j.getName() %></option>
+              <% } %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Scheduled Date *</label>
+            <input type="date" name="scheduledDate" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Notes</label>
+            <textarea name="notes" class="form-control" rows="2" maxlength="500"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Assign Office</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Reassign Modal -->
 <div class="modal fade modal-custom" id="reassignModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-arrow-repeat"></i> Reassign Task</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Reassign <strong id="reassignOfficeName"></strong> to:</p>
-        <select id="reassignJanitorSelect" class="form-select">
-          <% for (User j : janitors) { %>
-          <option value="<%= j.getName() %>"><%= j.getName() %></option>
-          <% } %>
-        </select>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="confirmReassignBtn">Reassign</button>
-      </div>
+      <form method="post" action="<%= ctx %>/cleaning-tasks" id="reassignForm">
+        <input type="hidden" name="action" value="reassign">
+        <input type="hidden" name="id" id="reassignTaskId">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-arrow-repeat"></i> Reassign Task</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Reassign <strong id="reassignOfficeName"></strong> to:</p>
+          <select name="janitorId" id="reassignJanitorSelect" class="form-select">
+            <% for (User j : janitors) { %>
+            <option value="<%= j.getId() %>"><%= j.getName() %></option>
+            <% } %>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Reassign</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    let currentTaskId = null;
-
     function showToast(message, type) {
         const toastDiv = document.createElement('div');
         toastDiv.className = 'custom-toast';
@@ -441,19 +518,21 @@
     }
 
     function openReassignModal(btn) {
-        currentTaskId = btn.getAttribute('data-task-id');
+        const taskId         = btn.getAttribute('data-task-id');
         const officeName     = btn.getAttribute('data-office-name');
-        const currentJanitor = btn.getAttribute('data-current-janitor');
+        const currentJanitorId = btn.getAttribute('data-current-janitor-id');
+        document.getElementById('reassignTaskId').value    = taskId;
         document.getElementById('reassignOfficeName').textContent = officeName;
         const select = document.getElementById('reassignJanitorSelect');
-        if (select && currentJanitor) select.value = currentJanitor;
+        if (select && currentJanitorId) {
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === currentJanitorId) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+        }
         new bootstrap.Modal(document.getElementById('reassignModal')).show();
-    }
-
-    function confirmReassign() {
-        const newJanitor = document.getElementById('reassignJanitorSelect').value;
-        showToast('Reassigned to ' + newJanitor, 'success');
-        bootstrap.Modal.getInstance(document.getElementById('reassignModal')).hide();
     }
 
     // Wire up reassign buttons via event delegation (no inline onclick)
@@ -461,8 +540,6 @@
         const btn = e.target.closest('.btn-reassign');
         if (btn) openReassignModal(btn);
     });
-
-    document.getElementById('confirmReassignBtn').addEventListener('click', confirmReassign);
 
     // Section navigation (driven by sidebar data-section links)
     document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
@@ -477,8 +554,6 @@
             document.getElementById('reportsSection').style.display   = section === 'reports'   ? 'block' : 'none';
         });
     });
-
-    window.confirmReassign = confirmReassign;
 </script>
 </body>
 </html>

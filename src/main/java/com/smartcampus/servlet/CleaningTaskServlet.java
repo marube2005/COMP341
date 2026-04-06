@@ -73,6 +73,7 @@ public class CleaningTaskServlet extends HttpServlet {
         try {
             switch (action) {
                 case "create":       handleCreate(req, resp, user); break;
+                case "reassign":     handleReassign(req, resp, user); break;
                 case "updateStatus": handleUpdateStatus(req, resp, user); break;
                 case "delete":       handleDelete(req, resp, user); break;
                 default: resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action); break;
@@ -81,6 +82,30 @@ public class CleaningTaskServlet extends HttpServlet {
             LOGGER.log(Level.SEVERE, "DB error in CleaningTaskServlet POST", e);
             handleError(req, resp, "A database error occurred.");
         }
+    }
+
+    private void handleReassign(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException, SQLException {
+
+        if (user.getRole() != User.Role.admin && user.getRole() != User.Role.supervisor) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        int id = ValidationUtil.parseIntOrDefault(req.getParameter("id"), -1);
+        if (id < 1) { resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid task ID"); return; }
+
+        String janitorIdStr = req.getParameter("janitorId");
+        if (!ValidationUtil.isPositiveInt(janitorIdStr)) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid janitor");
+            return;
+        }
+
+        int janitorId = Integer.parseInt(janitorIdStr.trim());
+        ctDAO.updateAssignedTo(id, janitorId);
+        LOGGER.log(Level.INFO, "Task {0} reassigned to janitorId={1} by userId={2}",
+                new Object[]{id, janitorId, user.getId()});
+        resp.sendRedirect(req.getContextPath() + "/supervisor/dashboard?success=reassigned");
     }
 
     // ─── Action handlers ─────────────────────────────────────
@@ -130,7 +155,11 @@ public class CleaningTaskServlet extends HttpServlet {
 
         ctDAO.create(task);
         LOGGER.log(Level.INFO, "Cleaning task created by userId={0}", user.getId());
-        resp.sendRedirect(req.getContextPath() + "/cleaning-tasks?success=created");
+        if (user.getRole() == User.Role.supervisor) {
+            resp.sendRedirect(req.getContextPath() + "/supervisor/dashboard?success=assigned");
+        } else {
+            resp.sendRedirect(req.getContextPath() + "/cleaning-tasks?success=created");
+        }
     }
 
     private void handleUpdateStatus(HttpServletRequest req, HttpServletResponse resp, User user)
