@@ -27,7 +27,7 @@
         }
     }
     long activeAlerts = inProgressCount;
-    int disputedCount = lecturerReports.size();
+    int reportCount = lecturerReports.size();
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -185,8 +185,8 @@
           <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
-              <h3><%= disputedCount %></h3>
-              <p>Disputed</p>
+              <h3><%= reportCount %></h3>
+              <p>Lecturer Reports</p>
             </div>
           </div>
           <div class="col-md-3">

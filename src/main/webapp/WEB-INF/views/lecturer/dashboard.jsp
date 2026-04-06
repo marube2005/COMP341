@@ -242,7 +242,7 @@
         <div class="tasks-container">
           <div class="tasks-header">
             <h5><i class="bi bi-star text-success"></i> Rate Cleaning Tasks</h5>
-            <p class="text-muted small">Rate the quality of completed cleaning tasks in your office</p>
+            <p class="text-muted small">Submit a rating and quality report for completed cleaning tasks in your office</p>
           </div>
 
           <% if (reportError != null) { %>
