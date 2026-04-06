@@ -166,6 +166,20 @@ public class CleaningTaskDAO {
         }
     }
 
+    /** Returns all cleaning tasks with the given status, ordered by scheduled_date descending. */
+    public List<CleaningTask> findByStatus(CleaningTask.Status status) throws SQLException {
+        List<CleaningTask> list = new ArrayList<>();
+        String sql = BASE_SELECT + "WHERE ct.status = ? ORDER BY ct.scheduled_date DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, status.name());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) list.add(mapRow(rs));
+            }
+        }
+        return list;
+    }
+
     /** Returns the count for today's tasks assigned to a specific janitor. */
     public int countTodayByJanitor(int janitorId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM cleaning_tasks WHERE assigned_to=? AND scheduled_date=CURDATE()";

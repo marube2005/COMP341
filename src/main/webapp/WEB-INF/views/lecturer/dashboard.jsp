@@ -6,6 +6,23 @@
     String ctx = request.getContextPath();
     String firstName = (currentUser.getName() != null && !currentUser.getName().isEmpty())
                        ? currentUser.getName().split(" ")[0] : "Lecturer";
+
+    @SuppressWarnings("unchecked")
+    List<CleaningTask> completedTasks = (List<CleaningTask>) request.getAttribute("completedTasks");
+    if (completedTasks == null) completedTasks = Collections.emptyList();
+
+    @SuppressWarnings("unchecked")
+    List<LecturerReport> myReports = (List<LecturerReport>) request.getAttribute("myReports");
+    if (myReports == null) myReports = Collections.emptyList();
+
+    // Build a set of already-rated task IDs for this lecturer
+    Set<Integer> ratedTaskIds = new HashSet<>();
+    for (LecturerReport r : myReports) ratedTaskIds.add(r.getTaskId());
+
+    String reportError   = (String) session.getAttribute("reportError");
+    String reportSuccess = (String) session.getAttribute("reportSuccess");
+    session.removeAttribute("reportError");
+    session.removeAttribute("reportSuccess");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -95,6 +112,19 @@
                       cursor: pointer; padding: 4px 8px; border-radius: 20px; transition: all 0.2s; }
         .report-btn:hover { background: #fee2e2; }
 
+        .star-rating { display: flex; gap: 4px; flex-direction: row-reverse; justify-content: flex-end; }
+        .star-rating input { display: none; }
+        .star-rating label { font-size: 1.6rem; color: #ccc; cursor: pointer; transition: color 0.15s; }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label { color: #f5a623; }
+        .star-filled { color: #f5a623; }
+
+        .rate-btn { background: var(--egerton-green); color: white; border: none;
+                    padding: 4px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 600;
+                    cursor: pointer; transition: all 0.2s; }
+        .rate-btn:hover { background: var(--egerton-green-dark); }
+
         @keyframes slideIn  { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
         .custom-toast { position: fixed; bottom: 20px; right: 20px; padding: 12px 20px; border-radius: 12px;
@@ -177,17 +207,127 @@
         </div>
       </div>
 
-      <!-- Reports Section -->
+      <!-- Reports Section (JS-based local reports) -->
       <div id="reportsSection" style="display:none;">
         <div class="tasks-container">
           <div class="tasks-header">
-            <h5><i class="bi bi-flag text-success"></i> My Dissatisfaction Reports</h5>
-            <p class="text-muted small">Reports sent to supervisor when you uncheck completed tasks</p>
+            <h5><i class="bi bi-flag text-success"></i> My Submitted Reports</h5>
+            <p class="text-muted small">Reports you have submitted to the supervisor</p>
           </div>
-          <div id="reportsList"></div>
+          <% if (myReports.isEmpty()) { %>
+          <div class="text-center py-4 text-muted">No reports submitted yet</div>
+          <% } else {
+               for (LecturerReport r : myReports) { %>
+          <div class="task-item">
+            <div class="task-content">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong><%= r.getTaskFacilityName() %></strong>
+                <span class="text-muted small"><%= r.getCreatedAt() != null ? r.getCreatedAt().toLocalDate() : "" %></span>
+              </div>
+              <div class="mb-1">
+                <% for (int s = 1; s <= 5; s++) { %>
+                <i class="bi bi-star<%= s <= r.getRating() ? "-fill star-filled" : "" %>"></i>
+                <% } %>
+                <small class="ms-1 text-muted">(<%= r.getRating() %>/5)</small>
+              </div>
+              <p class="text-muted small mb-0"><%= r.getReportText() %></p>
+            </div>
+          </div>
+          <% } } %>
         </div>
       </div>
 
+      <!-- Rate Tasks Section -->
+      <div id="rateTasksSection" style="display:none;">
+        <div class="tasks-container">
+          <div class="tasks-header">
+            <h5><i class="bi bi-star text-success"></i> Rate Cleaning Tasks</h5>
+            <p class="text-muted small">Rate the quality of completed cleaning tasks in your office</p>
+          </div>
+
+          <% if (reportError != null) { %>
+          <div class="alert alert-danger py-2 small"><%= reportError %></div>
+          <% } %>
+          <% if (reportSuccess != null) { %>
+          <div class="alert alert-success py-2 small"><%= reportSuccess %></div>
+          <% } %>
+
+          <% if (completedTasks.isEmpty()) { %>
+          <div class="text-center py-4 text-muted">No completed cleaning tasks available to rate</div>
+          <% } else {
+               for (CleaningTask t : completedTasks) {
+                 boolean alreadyRated = ratedTaskIds.contains(t.getId());
+          %>
+          <div class="task-item d-flex align-items-center gap-3">
+            <div class="task-content">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong><%= t.getFacilityName() %></strong>
+                <small class="text-muted">Completed: <%= t.getScheduledDate() %></small>
+              </div>
+              <small class="text-muted">Janitor: <%= t.getAssignedToName() != null ? t.getAssignedToName() : "N/A" %></small>
+            </div>
+            <div>
+              <% if (alreadyRated) { %>
+              <span class="badge bg-success">Rated</span>
+              <% } else { %>
+              <button class="rate-btn"
+                data-task-id="<%= t.getId() %>"
+                data-facility-name="<%= t.getFacilityName() %>"
+                data-janitor-name="<%= t.getAssignedToName() != null ? t.getAssignedToName() : "N/A" %>"
+                onclick="openRatingModal(this)">
+                <i class="bi bi-star"></i> Rate
+              </button>
+              <% } %>
+            </div>
+          </div>
+          <% } } %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Rating Modal -->
+<div class="modal fade modal-custom" id="ratingModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-star"></i> Rate Cleaning Task</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="post" action="<%= ctx %>/lecturer/report">
+        <div class="modal-body">
+          <input type="hidden" name="taskId" id="ratingTaskId">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Office</label>
+            <input type="text" class="form-control" id="ratingFacilityDisplay" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Janitor</label>
+            <input type="text" class="form-control" id="ratingJanitorDisplay" readonly>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Rating</label>
+            <div class="star-rating">
+              <input type="radio" name="rating" id="star5" value="5"><label for="star5" title="Excellent">&#9733;</label>
+              <input type="radio" name="rating" id="star4" value="4"><label for="star4" title="Good">&#9733;</label>
+              <input type="radio" name="rating" id="star3" value="3"><label for="star3" title="Average">&#9733;</label>
+              <input type="radio" name="rating" id="star2" value="2"><label for="star2" title="Poor">&#9733;</label>
+              <input type="radio" name="rating" id="star1" value="1"><label for="star1" title="Very Poor">&#9733;</label>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Report / Comments</label>
+            <textarea class="form-control" name="reportText" rows="3"
+                      placeholder="Describe the cleaning quality, any issues observed..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Submit Report</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
@@ -471,18 +611,28 @@
             JSON.stringify({ checkedIn, currentTasks, reports, savedAt: Date.now() }));
     }
 
-    // Sidebar section navigation (Dashboard / Reports)
+    // Sidebar section navigation (Dashboard / Rate Tasks / Reports)
     document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
             const section = link.getAttribute('data-section');
             document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
             link.classList.add('active');
-            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
-            document.getElementById('reportsSection').style.display   = section === 'reports'   ? 'block' : 'none';
+            document.getElementById('dashboardSection').style.display  = section === 'dashboard'  ? 'block' : 'none';
+            document.getElementById('reportsSection').style.display    = section === 'reports'    ? 'block' : 'none';
+            document.getElementById('rateTasksSection').style.display  = section === 'rateTasks'  ? 'block' : 'none';
             if (section === 'reports') renderReports();
         });
     });
+
+    function openRatingModal(btn) {
+        document.getElementById('ratingTaskId').value        = btn.getAttribute('data-task-id');
+        document.getElementById('ratingFacilityDisplay').value = btn.getAttribute('data-facility-name');
+        document.getElementById('ratingJanitorDisplay').value  = btn.getAttribute('data-janitor-name');
+        // Reset stars
+        document.querySelectorAll('#ratingModal input[name="rating"]').forEach(r => r.checked = false);
+        new bootstrap.Modal(document.getElementById('ratingModal')).show();
+    }
 
     // Event delegation for task checkboxes and report buttons
     document.addEventListener('change', e => {
@@ -497,6 +647,12 @@
 
     document.getElementById('checkinBtn').addEventListener('click', handleCheckIn);
     document.getElementById('submitReportBtn').addEventListener('click', submitReport);
+
+    // Auto-open Rate Tasks section if a flash message is present (after form submission)
+    <% if (reportError != null || reportSuccess != null) { %>
+    document.getElementById('dashboardSection').style.display  = 'none';
+    document.getElementById('rateTasksSection').style.display  = 'block';
+    <% } %>
 
     loadState();
 </script>

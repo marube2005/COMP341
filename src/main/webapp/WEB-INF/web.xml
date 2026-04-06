@@ -100,6 +100,16 @@
         <url-pattern>/cleaning-tasks</url-pattern>
     </servlet-mapping>
 
+    <!-- Lecturer Report submission -->
+    <servlet>
+        <servlet-name>LecturerReportServlet</servlet-name>
+        <servlet-class>com.smartcampus.servlet.LecturerReportServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LecturerReportServlet</servlet-name>
+        <url-pattern>/lecturer/report</url-pattern>
+    </servlet-mapping>
+
     <!-- Admin – User Management -->
     <servlet>
         <servlet-name>UserManagementServlet</servlet-name>

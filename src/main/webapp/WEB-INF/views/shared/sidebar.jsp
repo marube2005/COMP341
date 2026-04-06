@@ -21,6 +21,7 @@
     <a href="<%= ctx %>/cleaning-tasks"     class="nav-link-custom <%= "cleaning".equals(activePage) ? "active" : "" %>"><i class="bi bi-bucket-fill"></i> Cleaning Tasks</a>
     <% } else if ("lecturer".equals(userRole)) { %>
     <a href="<%= ctx %>/lecturer/dashboard"  class="nav-link-custom <%= "dashboard".equals(activePage) ? "active" : "" %>"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="#" data-section="rateTasks"     class="nav-link-custom"><i class="bi bi-star"></i> Rate Tasks</a>
     <a href="#" data-section="reports"       class="nav-link-custom"><i class="bi bi-flag"></i> My Reports</a>
     <% } else if ("janitor".equals(userRole)) { %>
     <a href="<%= ctx %>/janitor/dashboard"   class="nav-link-custom <%= "dashboard".equals(activePage) ? "active" : "" %>"><i class="bi bi-speedometer2"></i> Dashboard</a>

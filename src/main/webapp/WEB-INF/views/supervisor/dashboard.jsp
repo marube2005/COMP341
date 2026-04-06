@@ -13,6 +13,10 @@
     List<User> janitors = (List<User>) request.getAttribute("janitors");
     if (janitors == null) janitors = Collections.emptyList();
 
+    @SuppressWarnings("unchecked")
+    List<LecturerReport> lecturerReports = (List<LecturerReport>) request.getAttribute("lecturerReports");
+    if (lecturerReports == null) lecturerReports = Collections.emptyList();
+
     long pendingCount = 0, inProgressCount = 0, completedCount = 0;
     for (CleaningTask t : allTasks) {
         switch (t.getStatus()) {
@@ -23,6 +27,7 @@
         }
     }
     long activeAlerts = inProgressCount;
+    int disputedCount = lecturerReports.size();
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -180,7 +185,7 @@
           <div class="col-md-3">
             <div class="stat-card">
               <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
-              <h3>0</h3>
+              <h3><%= disputedCount %></h3>
               <p>Disputed</p>
             </div>
           </div>
@@ -342,9 +347,55 @@
       <!-- Dispute Reports Section -->
       <div id="reportsSection" style="display:none;">
         <div class="table-container">
-          <h5><i class="bi bi-flag text-success"></i> Dispute Reports</h5>
-          <p class="text-muted small">Reports filed by lecturers regarding cleaning quality</p>
-          <div class="text-center py-4 text-muted">No dispute reports</div>
+          <h5><i class="bi bi-flag text-success"></i> Lecturer Reports</h5>
+          <p class="text-muted small mb-3">Reports filed by lecturers rating the quality of cleaning tasks</p>
+          <% if (lecturerReports.isEmpty()) { %>
+          <div class="text-center py-4 text-muted">No reports submitted by lecturers yet</div>
+          <% } else { %>
+          <div class="table-responsive">
+            <table class="table table-custom align-middle">
+              <thead>
+                <tr>
+                  <th>Office / Facility</th>
+                  <th>Janitor</th>
+                  <th>Submitted By</th>
+                  <th>Rating</th>
+                  <th>Report</th>
+                  <th>Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% for (LecturerReport r : lecturerReports) { %>
+                <tr>
+                  <td><strong><%= r.getTaskFacilityName() %></strong></td>
+                  <td>
+                    <%
+                      String janitorName = "N/A";
+                      for (CleaningTask t : allTasks) {
+                          if (t.getId() == r.getTaskId()) {
+                              janitorName = t.getAssignedToName() != null ? t.getAssignedToName() : "N/A";
+                              break;
+                          }
+                      }
+                    %>
+                    <%= janitorName %>
+                  </td>
+                  <td><%= r.getLecturerName() %></td>
+                  <td>
+                    <% for (int s = 1; s <= 5; s++) { %>
+                    <i class="bi bi-star<%= s <= r.getRating() ? "-fill" : "" %>"
+                       style="color:<%= s <= r.getRating() ? "#f5a623" : "#ccc" %>; font-size:0.9rem;"></i>
+                    <% } %>
+                    <small class="ms-1 text-muted">(<%= r.getRating() %>/5)</small>
+                  </td>
+                  <td style="max-width:280px;"><%= r.getReportText() %></td>
+                  <td class="text-muted small"><%= r.getCreatedAt() != null ? r.getCreatedAt().toLocalDate() : "" %></td>
+                </tr>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+          <% } %>
         </div>
       </div>
 
