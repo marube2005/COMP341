@@ -124,7 +124,7 @@
             <% } %>
         </div>
 
-        <div class="demo-card">
+<!--        <div class="demo-card">
             <div class="demo-title"><i class="bi bi-stars"></i> QUICK DEMO ACCESS <i class="bi bi-stars"></i></div>
             <div class="demo-grid">
                 <div class="demo-item" onclick="fillDemo('admin.admin@egerton.ac.ke','admin123')">
@@ -144,7 +144,7 @@
                     <div class="demo-info"><span>Supervisor</span><small>mchebet.supervisor@egerton.ac.ke</small></div>
                 </div>
             </div>
-        </div>
+        </div>-->
         <div class="footer-note"><i class="bi bi-c-circle"></i> SmartCampus | Egerton University</div>
     </div>
 

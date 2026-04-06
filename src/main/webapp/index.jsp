@@ -659,7 +659,7 @@
             </div>
 
             <!-- Quick Demo Access -->
-            <div class="demo-section">
+<!--            <div class="demo-section">
                 <div class="demo-title">
                     <i class="bi bi-stars"></i> QUICK DEMO ACCESS <i class="bi bi-stars"></i>
                 </div>
@@ -696,7 +696,8 @@
                 <div class="demo-hint">
                     <i class="bi bi-info-circle-fill"></i> Click any account to auto-fill and sign in
                 </div>
-            </div>
+            </div>-->
+        </div>
         </div>
 
         <!-- Sign Up Card -->
