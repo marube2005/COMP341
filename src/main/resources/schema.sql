@@ -30,7 +30,7 @@ USE smartcampus;
 -- ─────────────────────────────────────────────────────────────
 -- Users table: stores all system users
 -- ─────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE  users (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(120)  NOT NULL,
     email       VARCHAR(150)  NOT NULL UNIQUE,
@@ -44,12 +44,12 @@ CREATE TABLE IF NOT EXISTS users (
 ) ENGINE=InnoDB;
 
 -- Add staff_id column to existing installations (safe no-op if already present)
-ALTER TABLE users ADD COLUMN IF NOT EXISTS staff_id VARCHAR(20);
+ALTER TABLE users ADD COLUMN staff_id VARCHAR(20);
 
 -- ─────────────────────────────────────────────────────────────
 -- Facilities table
 -- ─────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS facilities (
+CREATE TABLE facilities (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     name            VARCHAR(150)  NOT NULL,
     location        VARCHAR(200)  NOT NULL,
@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS facilities (
 -- ─────────────────────────────────────────────────────────────
 -- Cleaning tasks table
 -- ─────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS cleaning_tasks (
+CREATE TABLE cleaning_tasks (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     facility_id     INT           NOT NULL,
     assigned_to     INT           NOT NULL,          -- janitor user id
@@ -131,8 +131,8 @@ INSERT IGNORE INTO cleaning_tasks (id, facility_id, assigned_to, scheduled_date,
 -- ─────────────────────────────────────────────────────────────
 -- Assigned lecturer per facility (office owner)
 -- ─────────────────────────────────────────────────────────────
-ALTER TABLE facilities ADD COLUMN IF NOT EXISTS assigned_lecturer_id INT NULL;
-ALTER TABLE facilities ADD CONSTRAINT IF NOT EXISTS fk_facility_lecturer
+ALTER TABLE facilities ADD COLUMN assigned_lecturer_id INT NULL;
+ALTER TABLE facilities ADD CONSTRAINT fk_facility_lecturer
     FOREIGN KEY (assigned_lecturer_id) REFERENCES users(id) ON DELETE SET NULL;
 
 -- Assign demo lecturer (id=2, Dr. Sarah Wanjiku) to office A101 (id=1)
@@ -141,7 +141,7 @@ UPDATE facilities SET assigned_lecturer_id = 2 WHERE id = 1;
 -- ─────────────────────────────────────────────────────────────
 -- Lecturer daily check-ins
 -- ─────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS lecturer_checkins (
+CREATE TABLE lecturer_checkins (
     id           INT AUTO_INCREMENT PRIMARY KEY,
     lecturer_id  INT  NOT NULL,
     facility_id  INT  NOT NULL,
@@ -155,7 +155,7 @@ CREATE TABLE IF NOT EXISTS lecturer_checkins (
 -- ─────────────────────────────────────────────────────────────
 -- Individual cleaning activities per task (checklist items)
 -- ─────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS task_activities (
+CREATE TABLE task_activities (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     task_id    INT          NOT NULL,
     activity   VARCHAR(100) NOT NULL,
@@ -167,7 +167,7 @@ CREATE TABLE IF NOT EXISTS task_activities (
 -- ─────────────────────────────────────────────────────────────
 -- Janitor reports – filed by lecturers regarding cleaning quality
 -- ─────────────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS janitor_reports (
+CREATE TABLE janitor_reports (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     lecturer_id     INT           NOT NULL,
     task_name       VARCHAR(200)  NOT NULL,
