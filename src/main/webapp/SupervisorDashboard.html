@@ -123,11 +123,19 @@
             padding: 1.2rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             border: 1px solid var(--border-color);
-            transition: transform 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
             text-align: center;
+            cursor: pointer;
         }
 
         .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0,166,81,0.12);
+        }
+
+        .stat-card.stat-active {
+            border-color: var(--egerton-green);
+            box-shadow: 0 0 0 3px rgba(0,166,81,0.18);
             transform: translateY(-3px);
         }
 
@@ -379,36 +387,36 @@
                     </div>
                     <div>
                         <span class="badge bg-light text-dark p-2 shadow-sm">
-                            <i class="bi bi-person-circle"></i> Supervisor | mchebet@egerton.ac.ke
+                            <i class="bi bi-person-circle"></i> Supervisor
                         </span>
                     </div>
                 </div>
 
                 <!-- Stats Cards -->
                 <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stat-card">
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
+                        <div class="stat-card" data-nav="monitor" data-filter="completed" title="Click to view completed tasks" style="cursor:pointer;">
                             <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
                             <h3 id="completedCount">0</h3>
                             <p>Completed</p>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
+                    <div class="col-6 col-md-3 mb-3 mb-md-0">
+                        <div class="stat-card" data-nav="reports" title="Click to view dispute reports" style="cursor:pointer;">
                             <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
                             <h3 id="disputedCount">0</h3>
                             <p>Disputed</p>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" data-nav="monitor" data-filter="in_progress" title="Click to view in-progress tasks" style="cursor:pointer;">
                             <div class="stat-icon"><i class="bi bi-bell"></i></div>
                             <h3 id="activeAlerts">0</h3>
                             <p>Active Alerts</p>
                         </div>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stat-card">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-card" data-nav="monitor" data-filter="pending" title="Click to view pending tasks" style="cursor:pointer;">
                             <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
                             <h3 id="pendingCount">0</h3>
                             <p>Pending</p>
@@ -422,10 +430,10 @@
                         <i class="bi bi-clock-history text-danger fs-4"></i>
                         <div>
                             <strong>Incomplete Task Alert</strong><br>
-                            <small id="alertMessage">Task for Office A201 is still in progress past deadline</small>
+                            <small id="alertMessage">Tasks are currently in progress</small>
                         </div>
                         <div class="ms-auto">
-                            <small class="text-muted" id="alertDate">2026-03-20</small>
+                            <small class="text-muted" id="alertDate"></small>
                         </div>
                     </div>
                 </div>
@@ -441,8 +449,18 @@
             <!-- Live Monitor Section -->
             <div id="monitorSection" style="display: none;">
                 <div class="table-container">
-                    <h5><i class="bi bi-tv text-success"></i> Live Task Monitor</h5>
-                    <p class="text-muted small mb-3">Real-time tracking of all cleaning tasks</p>
+                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                        <div>
+                            <h5 class="mb-0"><i class="bi bi-tv text-success"></i> Live Task Monitor</h5>
+                            <p class="text-muted small mb-0">Real-time tracking of all cleaning tasks</p>
+                        </div>
+                        <div class="d-flex flex-wrap gap-2 mt-2 mt-md-0" id="monitorFilterBar">
+                            <button class="btn btn-sm btn-success" data-status-filter="all"><i class="bi bi-grid"></i> All</button>
+                            <button class="btn btn-sm btn-outline-secondary" data-status-filter="completed"><i class="bi bi-check2-circle"></i> Completed</button>
+                            <button class="btn btn-sm btn-outline-secondary" data-status-filter="in_progress"><i class="bi bi-hourglass-split"></i> In Progress</button>
+                            <button class="btn btn-sm btn-outline-secondary" data-status-filter="pending"><i class="bi bi-clock"></i> Pending</button>
+                        </div>
+                    </div>
                     <div class="table-responsive">
                         <table class="table table-custom">
                             <thead>
@@ -458,6 +476,7 @@
                             <tbody id="liveMonitorTable"></tbody>
                         </table>
                     </div>
+                    <div id="monitorNoResults" class="text-center py-3 text-muted d-none">No tasks match the selected filter.</div>
                 </div>
             </div>
 
@@ -489,9 +508,7 @@
             <div class="modal-body">
                 <p>Reassign <strong id="reassignOfficeName"></strong> to:</p>
                 <select id="reassignJanitorSelect" class="form-select">
-                    <option value="John Kamau">John Kamau</option>
-                    <option value="Mary Njeri">Mary Njeri</option>
-                    <option value="David Kiprop">David Kiprop</option>
+                    <!-- populated dynamically from janitors array -->
                 </select>
             </div>
             <div class="modal-footer">
@@ -504,21 +521,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // ============= DATA =============
-    let offices = [
-        { id: 1, office: "A101", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "John Kamau", deadline: "2026-03-20" },
-        { id: 2, office: "A102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "John Kamau", deadline: "2026-03-21" },
-        { id: 3, office: "A201", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "Mary Njeri", deadline: "2026-03-19" },
-        { id: 4, office: "B101", intensity: "Low", status: "completed", progress: 1, total: 1, assigned: "David Kiprop", deadline: "2026-03-20" },
-        { id: 5, office: "B102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "David Kiprop", deadline: "2026-03-21" }
-    ];
-
-    let janitors = [
-        { name: "John Kamau", initial: "JK", gender: "Male", wing: "A", completedTasks: 0, totalTasks: 2 },
-        { name: "David Kiprop", initial: "DK", gender: "Male", wing: "B", completedTasks: 1, totalTasks: 2 },
-        { name: "Mary Njeri", initial: "MN", gender: "Female", wing: "A", completedTasks: 0, totalTasks: 1 }
-    ];
-
+    // ============= DATA (loaded from localStorage; no hardcoded defaults) =============
+    let offices = [];
+    let janitors = [];
     let disputeReports = [];
 
     let currentReassignOffice = null;
@@ -551,12 +556,12 @@
 
     function updateStats() {
         const completed = offices.filter(o => o.status === 'completed').length;
-        const pending = offices.filter(o => o.status === 'pending' || o.status === 'in progress').length;
+        const pending = offices.filter(o => o.status === 'pending' || o.status === 'in_progress').length;
         const disputed = disputeReports.length;
         
         // Check for overdue tasks (in progress past deadline)
         const today = new Date().toISOString().split('T')[0];
-        const overdueTasks = offices.filter(o => o.status === 'in progress' && o.deadline < today);
+        const overdueTasks = offices.filter(o => o.status === 'in_progress' && o.deadline < today);
         const activeAlerts = overdueTasks.length + disputed;
         
         document.getElementById('completedCount').textContent = completed;
@@ -581,7 +586,7 @@
         const container = document.getElementById('pendingTasksList');
         if (!container) return;
         
-        const pendingOffices = offices.filter(o => o.status === 'pending' || o.status === 'in progress');
+        const pendingOffices = offices.filter(o => o.status === 'pending' || o.status === 'in_progress');
         
         if (pendingOffices.length === 0) {
             container.innerHTML = '<div class="text-center py-4 text-muted">No pending tasks</div>';
@@ -591,8 +596,8 @@
         container.innerHTML = '';
         pendingOffices.forEach(office => {
             const percent = (office.progress / office.total) * 100;
-            const statusClass = office.status === 'in progress' ? 'status-progress' : 'status-pending';
-            const statusText = office.status === 'in progress' ? 'In Progress' : 'Pending';
+            const statusClass = office.status === 'in_progress' ? 'status-progress' : 'status-pending';
+            const statusText = office.status === 'in_progress' ? 'In Progress' : 'Pending';
             
             const item = document.createElement('div');
             item.className = 'task-item';
@@ -631,7 +636,7 @@
             if (office.status === 'completed') {
                 statusClass = 'status-completed';
                 statusText = 'Completed';
-            } else if (office.status === 'in progress') {
+            } else if (office.status === 'in_progress') {
                 statusClass = 'status-progress';
                 statusText = 'In Progress';
             } else {
@@ -640,6 +645,7 @@
             }
             
             const row = document.createElement('tr');
+            row.setAttribute('data-status', office.status);
             row.innerHTML = `
                 <td><strong>${office.office}</strong></td>
                 <td><span class="${intensityClass}">${office.intensity}</span></td>
@@ -661,6 +667,10 @@
             `;
             tbody.appendChild(row);
         });
+
+        // Re-apply current filter after re-render
+        const activeFilter = document.querySelector('[data-status-filter].btn-success');
+        if (activeFilter) applyMonitorFilter(activeFilter.getAttribute('data-status-filter'));
     }
 
     function renderJanitorStaff() {
@@ -737,7 +747,9 @@
         if (currentReassignOffice) {
             document.getElementById('reassignOfficeName').textContent = officeName;
             const select = document.getElementById('reassignJanitorSelect');
-            select.value = currentReassignOffice.assigned;
+            select.innerHTML = janitors.map(j =>
+                `<option value="${j.name}"${j.name === currentReassignOffice.assigned ? ' selected' : ''}>${j.name}</option>`
+            ).join('');
             const modal = new bootstrap.Modal(document.getElementById('reassignModal'));
             modal.show();
         }
@@ -805,7 +817,7 @@
                             if (janitorOffice.isClean) {
                                 office.status = 'completed';
                             } else if (completedTasks > 0 && completedTasks < office.total) {
-                                office.status = 'in progress';
+                                office.status = 'in_progress';
                             } else if (completedTasks === 0) {
                                 office.status = 'pending';
                             }
@@ -856,20 +868,8 @@
     }
     
     function resetToDefault() {
-        offices = [
-            { id: 1, office: "A101", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "John Kamau", deadline: "2026-03-20" },
-            { id: 2, office: "A102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "John Kamau", deadline: "2026-03-21" },
-            { id: 3, office: "A201", intensity: "High", status: "in progress", progress: 0, total: 4, assigned: "Mary Njeri", deadline: "2026-03-19" },
-            { id: 4, office: "B101", intensity: "Low", status: "completed", progress: 1, total: 1, assigned: "David Kiprop", deadline: "2026-03-20" },
-            { id: 5, office: "B102", intensity: "Low", status: "pending", progress: 0, total: 1, assigned: "David Kiprop", deadline: "2026-03-21" }
-        ];
-        
-        janitors = [
-            { name: "John Kamau", initial: "JK", gender: "Male", wing: "A", completedTasks: 0, totalTasks: 2 },
-            { name: "David Kiprop", initial: "DK", gender: "Male", wing: "B", completedTasks: 1, totalTasks: 2 },
-            { name: "Mary Njeri", initial: "MN", gender: "Female", wing: "A", completedTasks: 0, totalTasks: 1 }
-        ];
-        
+        offices = [];
+        janitors = [];
         disputeReports = [];
         updateJanitorStats();
     }
@@ -882,23 +882,71 @@
         renderDisputeReports();
     }
 
-    // Navigation
+    // ── Monitor filter ──────────────────────────────────────────────────────
+    function applyMonitorFilter(filter) {
+        const tbody = document.getElementById('liveMonitorTable');
+        const noResults = document.getElementById('monitorNoResults');
+        if (!tbody) return;
+
+        let visible = 0;
+        tbody.querySelectorAll('tr').forEach(row => {
+            const status = row.getAttribute('data-status');
+            const show = (filter === 'all' || status === filter);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        if (noResults) noResults.classList.toggle('d-none', visible > 0);
+
+        document.querySelectorAll('[data-status-filter]').forEach(btn => {
+            const active = btn.getAttribute('data-status-filter') === filter;
+            btn.classList.toggle('btn-success', active);
+            btn.classList.toggle('btn-outline-secondary', !active);
+        });
+    }
+
+    // ── Section navigation ──────────────────────────────────────────────────
+    function navigateToSection(section, statusFilter) {
+        document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
+        document.getElementById('monitorSection').style.display   = section === 'monitor'   ? 'block' : 'none';
+        document.getElementById('staffSection').style.display     = section === 'staff'     ? 'block' : 'none';
+        document.getElementById('reportsSection').style.display   = section === 'reports'   ? 'block' : 'none';
+
+        document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.nav-link-custom[data-section="' + section + '"]').forEach(l => l.classList.add('active'));
+
+        document.querySelectorAll('.stat-card[data-nav]').forEach(c => c.classList.remove('stat-active'));
+        if (statusFilter) {
+            document.querySelectorAll('.stat-card[data-nav="' + section + '"][data-filter="' + statusFilter + '"]')
+                    .forEach(c => c.classList.add('stat-active'));
+        }
+
+        if (section === 'monitor') {
+            if (statusFilter) applyMonitorFilter(statusFilter);
+            renderLiveMonitor();
+        }
+        if (section === 'staff') renderJanitorStaff();
+        if (section === 'reports') renderDisputeReports();
+    }
+
+    // Navigation - sidebar links
     document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
         link.addEventListener('click', () => {
-            const section = link.getAttribute('data-section');
-            
-            document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            
-            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
-            document.getElementById('monitorSection').style.display = section === 'monitor' ? 'block' : 'none';
-            document.getElementById('staffSection').style.display = section === 'staff' ? 'block' : 'none';
-            document.getElementById('reportsSection').style.display = section === 'reports' ? 'block' : 'none';
-            
-            if (section === 'monitor') renderLiveMonitor();
-            if (section === 'staff') renderJanitorStaff();
-            if (section === 'reports') renderDisputeReports();
+            navigateToSection(link.getAttribute('data-section'));
         });
+    });
+
+    // Navigation - stat card clicks
+    document.querySelectorAll('.stat-card[data-nav]').forEach(card => {
+        card.addEventListener('click', function () {
+            navigateToSection(this.getAttribute('data-nav'), this.getAttribute('data-filter') || null);
+        });
+    });
+
+    // Filter button clicks
+    document.addEventListener('click', e => {
+        const filterBtn = e.target.closest('[data-status-filter]');
+        if (filterBtn) applyMonitorFilter(filterBtn.getAttribute('data-status-filter'));
     });
     
     // Initialize

@@ -15,8 +15,15 @@
     if (janitors == null) janitors = Collections.emptyList();
 
     @SuppressWarnings("unchecked")
+    List<Facility> facilities = (List<Facility>) request.getAttribute("facilities");
+    if (facilities == null) facilities = Collections.emptyList();
+
+    @SuppressWarnings("unchecked")
     List<JanitorReport> lecturerReports = (List<JanitorReport>) request.getAttribute("lecturerReports");
     if (lecturerReports == null) lecturerReports = Collections.emptyList();
+
+    String success  = request.getParameter("success");
+    String errorMsg = (String) request.getAttribute("error");
 
     long pendingCount = 0, inProgressCount = 0, completedCount = 0;
     for (CleaningTask t : allTasks) {
@@ -83,8 +90,10 @@
 
         .stat-card { background: var(--card-white); border-radius: 20px; padding: 1.2rem;
                      box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid var(--border-color);
-                     transition: transform 0.2s; text-align: center; }
-        .stat-card:hover { transform: translateY(-3px); }
+                     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; text-align: center;
+                     cursor: pointer; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,166,81,0.12); }
+        .stat-card.stat-active { border-color: var(--egerton-green); box-shadow: 0 0 0 3px rgba(0,166,81,0.18); transform: translateY(-3px); }
         .stat-icon { width: 48px; height: 48px;
                      background: linear-gradient(135deg, rgba(0,166,81,0.1), rgba(210,172,103,0.1));
                      border-radius: 16px; display: flex; align-items: center; justify-content: center;
@@ -168,39 +177,60 @@
           <h1>Supervisor Dashboard</h1>
           <p>Monitor and manage cleaning operations</p>
         </div>
-        <span class="badge bg-light text-dark p-2 shadow-sm">
-          <i class="bi bi-person-circle"></i> Supervisor &nbsp;|&nbsp; <%= currentUser.getEmail() %>
-        </span>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#assignOfficeModal">
+            <i class="bi bi-plus-circle-fill me-1"></i> Assign Office
+          </button>
+          <span class="badge bg-light text-dark p-2 shadow-sm">
+            <i class="bi bi-person-circle"></i> Supervisor &nbsp;|&nbsp; <%= currentUser.getEmail() %>
+          </span>
+        </div>
       </div>
+
+      <% if (success != null) {
+           String successMsg = "assigned".equals(success) ? "Office assigned to janitor successfully."
+                             : "reassigned".equals(success) ? "Task reassigned successfully."
+                             : "Operation completed successfully."; %>
+      <div class="alert alert-success alert-dismissible fade show">
+        <i class="bi bi-check-circle-fill me-2"></i><%= successMsg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <% } %>
+      <% if (errorMsg != null) { %>
+      <div class="alert alert-danger alert-dismissible fade show">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><%= errorMsg %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      <% } %>
 
       <!-- Dashboard Section -->
       <div id="dashboardSection">
 
         <!-- Stats Cards -->
         <div class="row mb-4">
-          <div class="col-md-3">
-            <div class="stat-card">
+          <div class="col-6 col-md-3 mb-3 mb-md-0">
+            <div class="stat-card" data-nav="monitor" data-filter="completed" title="Click to view completed tasks">
               <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
               <h3><%= completedCount %></h3>
               <p>Completed</p>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="stat-card">
+          <div class="col-6 col-md-3 mb-3 mb-md-0">
+            <div class="stat-card" data-nav="reports" title="Click to view dispute reports">
               <div class="stat-icon"><i class="bi bi-exclamation-triangle"></i></div>
               <h3><%= lecturerReports.size() %></h3>
               <p>Disputed</p>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="stat-card">
+          <div class="col-6 col-md-3">
+            <div class="stat-card" data-nav="monitor" data-filter="in_progress" title="Click to view in-progress tasks">
               <div class="stat-icon"><i class="bi bi-bell"></i></div>
               <h3><%= activeAlerts %></h3>
               <p>Active Alerts</p>
             </div>
           </div>
-          <div class="col-md-3">
-            <div class="stat-card">
+          <div class="col-6 col-md-3">
+            <div class="stat-card" data-nav="monitor" data-filter="pending" title="Click to view pending tasks">
               <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
               <h3><%= pendingCount %></h3>
               <p>Pending</p>
@@ -258,8 +288,18 @@
       <!-- Live Monitor Section -->
       <div id="monitorSection" style="display:none;">
         <div class="table-container">
-          <h5><i class="bi bi-tv text-success"></i> Live Task Monitor</h5>
-          <p class="text-muted small mb-3">Real-time tracking of all cleaning tasks</p>
+          <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+            <div>
+              <h5 class="mb-0"><i class="bi bi-tv text-success"></i> Live Task Monitor</h5>
+              <p class="text-muted small mb-0">Real-time tracking of all cleaning tasks</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2 mt-2 mt-md-0" id="monitorFilterBar">
+              <button class="btn btn-sm btn-success" data-status-filter="all"><i class="bi bi-grid"></i> All</button>
+              <button class="btn btn-sm btn-outline-secondary" data-status-filter="completed"><i class="bi bi-check2-circle"></i> Completed</button>
+              <button class="btn btn-sm btn-outline-secondary" data-status-filter="in_progress"><i class="bi bi-hourglass-split"></i> In Progress</button>
+              <button class="btn btn-sm btn-outline-secondary" data-status-filter="pending"><i class="bi bi-clock"></i> Pending</button>
+            </div>
+          </div>
           <% if (allTasks.isEmpty()) { %>
           <div class="text-center py-4 text-muted">No tasks found</div>
           <% } else { %>
@@ -274,15 +314,16 @@
                   <th>Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="monitorTableBody">
                 <% for (CleaningTask t : allTasks) {
                      String sc = "status-pending";
                      String sl = "Pending";
-                     if (t.getStatus() == CleaningTask.Status.completed)   { sc = "status-completed"; sl = "Completed"; }
-                     else if (t.getStatus() == CleaningTask.Status.in_progress) { sc = "status-progress";  sl = "In Progress"; }
-                     else if (t.getStatus() == CleaningTask.Status.skipped) { sc = "status-skipped";   sl = "Skipped"; }
+                     String ds = "pending";
+                     if (t.getStatus() == CleaningTask.Status.completed)   { sc = "status-completed"; sl = "Completed";  ds = "completed"; }
+                     else if (t.getStatus() == CleaningTask.Status.in_progress) { sc = "status-progress";  sl = "In Progress"; ds = "in_progress"; }
+                     else if (t.getStatus() == CleaningTask.Status.skipped) { sc = "status-skipped";   sl = "Skipped";    ds = "skipped"; }
                 %>
-                <tr>
+                <tr data-status="<%= ds %>">
                   <td><strong><%= t.getFacilityName() %></strong></td>
                   <td><span class="<%= sc %>"><%= sl %></span></td>
                   <td><%= t.getScheduledDate() %></td>
@@ -291,7 +332,7 @@
                     <button class="btn-reassign"
                       data-task-id="<%= t.getId() %>"
                       data-office-name="<%= t.getFacilityName() %>"
-                      data-current-janitor="<%= t.getAssignedToName() != null ? t.getAssignedToName() : "" %>">
+                      data-current-janitor-id="<%= t.getAssignedTo() %>">
                       <i class="bi bi-arrow-repeat"></i> Reassign
                     </button>
                   </td>
@@ -300,6 +341,7 @@
               </tbody>
             </table>
           </div>
+          <div id="monitorNoResults" class="text-center py-3 text-muted d-none">No tasks match the selected filter.</div>
           <% } %>
         </div>
       </div>
@@ -398,33 +440,84 @@
   </div>
 </div>
 
+<!-- Assign Office Modal -->
+<div class="modal fade modal-custom" id="assignOfficeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="post" action="<%= ctx %>/cleaning-tasks">
+        <input type="hidden" name="action" value="create">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-plus-circle-fill"></i> Assign Office for Cleaning</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Office / Facility *</label>
+            <select name="facilityId" class="form-select" required>
+              <option value="">-- Select Office --</option>
+              <% for (Facility f : facilities) { %>
+              <option value="<%= f.getId() %>"><%= f.getName() %></option>
+              <% } %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Assign To (Janitor) *</label>
+            <select name="janitorId" class="form-select" required>
+              <option value="">-- Select Janitor --</option>
+              <% for (User j : janitors) { %>
+              <option value="<%= j.getId() %>"><%= j.getName() %></option>
+              <% } %>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Scheduled Date *</label>
+            <input type="date" name="scheduledDate" class="form-control" required id="assignOfficeDate">
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold small">Notes</label>
+            <textarea name="notes" class="form-control" rows="2" maxlength="500"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">Assign Office</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 <!-- Reassign Modal -->
 <div class="modal fade modal-custom" id="reassignModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-arrow-repeat"></i> Reassign Task</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <p>Reassign <strong id="reassignOfficeName"></strong> to:</p>
-        <select id="reassignJanitorSelect" class="form-select">
-          <% for (User j : janitors) { %>
-          <option value="<%= j.getName() %>"><%= j.getName() %></option>
-          <% } %>
-        </select>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="confirmReassignBtn">Reassign</button>
-      </div>
+      <form method="post" action="<%= ctx %>/cleaning-tasks" id="reassignForm">
+        <input type="hidden" name="action" value="reassign">
+        <input type="hidden" name="id" id="reassignTaskId">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-arrow-repeat"></i> Reassign Task</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <p>Reassign <strong id="reassignOfficeName"></strong> to:</p>
+          <select name="janitorId" id="reassignJanitorSelect" class="form-select">
+            <% for (User j : janitors) { %>
+            <option value="<%= j.getId() %>"><%= j.getName() %></option>
+            <% } %>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Reassign</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    let currentTaskId = null;
+    document.getElementById('assignOfficeDate').min = new Date().toISOString().split('T')[0];
 
     function showToast(message, type) {
         const toastDiv = document.createElement('div');
@@ -441,44 +534,96 @@
     }
 
     function openReassignModal(btn) {
-        currentTaskId = btn.getAttribute('data-task-id');
+        const taskId         = btn.getAttribute('data-task-id');
         const officeName     = btn.getAttribute('data-office-name');
-        const currentJanitor = btn.getAttribute('data-current-janitor');
+        const currentJanitorId = btn.getAttribute('data-current-janitor-id');
+        document.getElementById('reassignTaskId').value    = taskId;
         document.getElementById('reassignOfficeName').textContent = officeName;
         const select = document.getElementById('reassignJanitorSelect');
-        if (select && currentJanitor) select.value = currentJanitor;
+        if (select && currentJanitorId) {
+            for (let i = 0; i < select.options.length; i++) {
+                if (select.options[i].value === currentJanitorId) {
+                    select.selectedIndex = i;
+                    break;
+                }
+            }
+        }
         new bootstrap.Modal(document.getElementById('reassignModal')).show();
     }
 
-    function confirmReassign() {
-        const newJanitor = document.getElementById('reassignJanitorSelect').value;
-        showToast('Reassigned to ' + newJanitor, 'success');
-        bootstrap.Modal.getInstance(document.getElementById('reassignModal')).hide();
+    // ── Section navigation ──────────────────────────────────────────────────
+    function navigateToSection(section, statusFilter) {
+        const sections = { dashboard: 'dashboardSection', monitor: 'monitorSection', staff: 'staffSection', reports: 'reportsSection' };
+        Object.values(sections).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.display = 'none';
+        });
+        const target = sections[section];
+        if (target) document.getElementById(target).style.display = 'block';
+
+        // Update active state on all nav links (desktop + mobile drawer)
+        document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
+        document.querySelectorAll('.nav-link-custom[data-section="' + section + '"]').forEach(l => l.classList.add('active'));
+
+        // Update active state on stat cards
+        document.querySelectorAll('.stat-card[data-nav]').forEach(c => c.classList.remove('stat-active'));
+        if (statusFilter) {
+            document.querySelectorAll('.stat-card[data-nav="' + section + '"][data-filter="' + statusFilter + '"]')
+                    .forEach(c => c.classList.add('stat-active'));
+        }
+
+        if (section === 'monitor') {
+            applyMonitorFilter(statusFilter || 'all');
+        }
     }
 
-    // Wire up reassign buttons via event delegation (no inline onclick)
+    // ── Monitor filter ──────────────────────────────────────────────────────
+    function applyMonitorFilter(filter) {
+        const tbody = document.getElementById('monitorTableBody');
+        const noResults = document.getElementById('monitorNoResults');
+        if (!tbody) return;
+
+        let visible = 0;
+        tbody.querySelectorAll('tr').forEach(row => {
+            const status = row.getAttribute('data-status');
+            const show = (filter === 'all' || status === filter);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        if (noResults) noResults.classList.toggle('d-none', visible > 0);
+
+        // Highlight active filter button
+        document.querySelectorAll('[data-status-filter]').forEach(btn => {
+            const active = btn.getAttribute('data-status-filter') === filter;
+            btn.classList.toggle('btn-success', active);
+            btn.classList.toggle('btn-outline-secondary', !active);
+        });
+    }
+
+    // ── Event delegation (reassign + filter buttons) ───────────────────────
     document.addEventListener('click', e => {
-        const btn = e.target.closest('.btn-reassign');
-        if (btn) openReassignModal(btn);
+        const reassignBtn = e.target.closest('.btn-reassign');
+        if (reassignBtn) { openReassignModal(reassignBtn); return; }
+
+        const filterBtn = e.target.closest('[data-status-filter]');
+        if (filterBtn) { applyMonitorFilter(filterBtn.getAttribute('data-status-filter')); return; }
     });
 
-    document.getElementById('confirmReassignBtn').addEventListener('click', confirmReassign);
-
-    // Section navigation (driven by sidebar data-section links)
+    // ── Sidebar / mobile-drawer section links ──────────────────────────────
     document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
         link.addEventListener('click', e => {
             e.preventDefault();
-            const section = link.getAttribute('data-section');
-            document.querySelectorAll('.nav-link-custom').forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            document.getElementById('dashboardSection').style.display = section === 'dashboard' ? 'block' : 'none';
-            document.getElementById('monitorSection').style.display   = section === 'monitor'   ? 'block' : 'none';
-            document.getElementById('staffSection').style.display     = section === 'staff'     ? 'block' : 'none';
-            document.getElementById('reportsSection').style.display   = section === 'reports'   ? 'block' : 'none';
+            navigateToSection(link.getAttribute('data-section'));
         });
     });
 
-    window.confirmReassign = confirmReassign;
+    // ── Stat card click → navigate to respective section ───────────────────
+    document.querySelectorAll('.stat-card[data-nav]').forEach(card => {
+        card.addEventListener('click', function () {
+            navigateToSection(this.getAttribute('data-nav'), this.getAttribute('data-filter') || null);
+        });
+    });
 </script>
 </body>
 </html>

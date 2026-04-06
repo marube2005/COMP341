@@ -111,6 +111,17 @@ public class CleaningTaskDAO {
         }
     }
 
+    /** Updates only the assigned janitor of a cleaning task. */
+    public boolean updateAssignedTo(int id, int janitorId) throws SQLException {
+        String sql = "UPDATE cleaning_tasks SET assigned_to=? WHERE id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, janitorId);
+            ps.setInt(2, id);
+            return ps.executeUpdate() > 0;
+        }
+    }
+
     /** Updates only the status of a cleaning task. */
     public boolean updateStatus(int id, CleaningTask.Status status) throws SQLException {
         String sql = "UPDATE cleaning_tasks SET status=? WHERE id=?";
@@ -162,6 +173,31 @@ public class CleaningTaskDAO {
             ps.setString(1, CleaningTask.Status.completed.name());
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next() ? rs.getInt(1) : 0;
+            }
+        }
+    }
+
+    /**
+     * Returns {@code true} if a cleaning task already exists for the given
+     * facility on the given date (optionally excluding one task by ID, useful
+     * when checking during a reassign operation).
+     *
+     * @param facilityId    the facility to check
+     * @param date          the scheduled date to check
+     * @param excludeTaskId task ID to exclude from the check, or {@code -1} to include all tasks
+     */
+    public boolean existsByFacilityAndDate(int facilityId, LocalDate date, int excludeTaskId)
+            throws SQLException {
+        String sql = excludeTaskId > 0
+                ? "SELECT 1 FROM cleaning_tasks WHERE facility_id=? AND scheduled_date=? AND id<>? LIMIT 1"
+                : "SELECT 1 FROM cleaning_tasks WHERE facility_id=? AND scheduled_date=? LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, facilityId);
+            ps.setDate(2, Date.valueOf(date));
+            if (excludeTaskId > 0) ps.setInt(3, excludeTaskId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
             }
         }
     }

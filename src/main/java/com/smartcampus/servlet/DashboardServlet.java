@@ -67,6 +67,7 @@ public class DashboardServlet extends HttpServlet {
                 case supervisor:
                     req.setAttribute("allTasks",        ctDAO.findAll());
                     req.setAttribute("janitors",        userDAO.findByRole(User.Role.janitor));
+                    req.setAttribute("facilities",      facDAO.findAll());
                     req.setAttribute("lecturerReports", reportDAO.findAll());
                     jspPath = "/WEB-INF/views/supervisor/dashboard.jsp";
                     break;
