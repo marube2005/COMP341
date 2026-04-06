@@ -218,6 +218,8 @@
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50px;
             padding: 4px;
+            position: relative;
+            z-index: 10;
         }
 
         .tab-btn {
@@ -231,6 +233,9 @@
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
+            pointer-events: auto;
         }
 
         .tab-btn.active {
@@ -290,8 +295,8 @@
         .form-label {
             font-weight: 600;
             color: var(--text-dark);
-            font-size: 0.7rem;
-            margin-bottom: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -299,24 +304,28 @@
 
         .form-label i {
             color: var(--egerton-green);
-            font-size: 0.75rem;
+            font-size: 0.9rem;
         }
 
         .form-label .required {
             color: #dc3545;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
         }
 
         .form-control, .form-select {
             background-color: var(--input-bg);
             border: 1.5px solid #e9ecef;
-            padding: 8px 12px;
+            padding: 12px 14px;
             border-radius: 12px;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 500;
             color: #1f2a3a;
             transition: all 0.2s;
             width: 100%;
+            height: auto;
+            position: relative;
+            z-index: 5;
+            pointer-events: auto;
         }
 
         .form-control:focus, .form-select:focus {
@@ -472,11 +481,32 @@
         }
 
         @media (max-width: 768px) {
-            .main-container { max-width: 100%; margin-bottom: 60px; }
-            .auth-card { padding: 18px 20px; max-height: 70vh; }
+            body { padding: 15px; align-items: center; }
+            .main-container { max-width: 100%; margin: 0 auto; }
+            .header-section { margin-bottom: 16px; }
+            .header-section h1 { font-size: 1.5rem; }
+            .header-section p { font-size: 0.7rem; }
+            .auth-tabs { gap: 8px; padding: 4px; margin-bottom: 16px; }
+            .tab-btn { padding: 10px 18px; font-size: 0.9rem; }
+            .auth-card { padding: 24px 26px; max-height: none; overflow-y: visible; }
+            .form-group { margin-bottom: 14px; }
+            .form-label { font-size: 0.85rem; }
+            .form-control, .form-select { padding: 12px 14px; font-size: 0.95rem; }
+            .btn-auth { padding: 12px; font-size: 0.95rem; }
+            .demo-section { padding: 12px 16px; }
+            .demo-grid { grid-template-columns: 1fr; gap: 10px; }
             .scrolling-content { font-size: 0.9rem; animation: scroll-left 40s linear infinite; }
             .scrolling-content strong { font-size: 1rem; }
             .separator { height: 20px; margin: 0 15px; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 12px; align-items: center; }
+            .header-section h1 { font-size: 1.4rem; }
+            .auth-card { padding: 20px 22px; border-radius: 18px; }
+            .form-label { font-size: 0.82rem; }
+            .form-control, .form-select { padding: 11px 13px; font-size: 0.92rem; }
+            .demo-item { padding: 10px 12px; }
         }
 
         @keyframes slideIn {
@@ -741,7 +771,7 @@
                         <input type="checkbox" id="termsCheck" required>
                         <label for="termsCheck">I agree to the <a href="#" onclick="return false;">Terms of Use</a> and <a href="#" onclick="return false;">Privacy Policy</a></label>
                     </div>
-                    <button type="submit" class="btn-auth">
+                   <button type="submit" class="btn-auth">
                         <i class="bi bi-person-plus-fill"></i> Create Account
                     </button>
                 </form>
@@ -751,11 +781,9 @@
                     <span><%= registerError %></span>
                 </div>
                 <% } %>
-            </div>
-           </div>
-        </div>
-
-      
+          </div>
+      </div>
+  </div>
 
         <div class="footer-note">
             <i class="bi bi-c-circle"></i> SmartCampus | Egerton University — Excellence Through Innovation
