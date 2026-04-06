@@ -48,7 +48,7 @@
 
         /* Sidebar */
         .sidebar { background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--egerton-green-deep) 100%);
-                   min-height: 100vh; color: white; position: relative; }
+                   min-height: 100vh; color: white; }
         .nav-link-custom { color: rgba(255,255,255,.85); padding: .7rem 1.2rem; margin: .2rem .8rem;
                            border-radius: 12px; transition: all .2s; font-weight: 500; font-size: .9rem;
                            display: flex; align-items: center; gap: 10px; text-decoration: none; }
@@ -134,7 +134,13 @@
                         box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease;
                         cursor: pointer; display: flex; align-items: center; gap: 8px; }
 
-        @media (max-width: 768px) { .page-header h1 { font-size: 1.4rem; } }
+        @media (max-width: 767.98px) {
+            .page-header h1 { font-size: 1.4rem; }
+            .stat-card { padding: 1rem; }
+            .table-container { padding: 1rem 0.75rem; border-radius: 14px; }
+            .section-tabs { gap: 0.35rem; }
+            .section-tab { font-size: 0.8rem; padding: 0.4rem 0.8rem; }
+        }
     </style>
 </head>
 <body>

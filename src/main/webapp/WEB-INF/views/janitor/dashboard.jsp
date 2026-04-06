@@ -51,8 +51,7 @@
         body { background: var(--bg-light); font-family: 'Inter', sans-serif; overflow-x: hidden; }
 
         .sidebar { background: linear-gradient(180deg, var(--sidebar-bg) 0%, var(--egerton-green-deep) 100%);
-                   min-height: 100vh; color: white; box-shadow: 2px 0 12px rgba(0,0,0,0.08); }
-        .nav-link-custom { color: rgba(255,255,255,0.85); padding: 0.7rem 1.2rem; margin: 0.2rem 0.8rem;
+                   min-height: 100vh; color: white; box-shadow: 2px 0 12px rgba(0,0,0,0.08); }        .nav-link-custom { color: rgba(255,255,255,0.85); padding: 0.7rem 1.2rem; margin: 0.2rem 0.8rem;
                            border-radius: 12px; transition: all 0.2s; font-weight: 500; font-size: 0.9rem;
                            display: flex; align-items: center; gap: 10px; text-decoration: none; }
         .nav-link-custom:hover { background: var(--sidebar-hover); color: white; transform: translateX(4px); }
@@ -109,9 +108,12 @@
                         border-bottom: 1px solid var(--border-color); }
         .history-item:last-child { border-bottom: none; }
 
-        @media (max-width: 768px) {
-            .sidebar { min-height: auto; }
+        @media (max-width: 767.98px) {
             .main-content { padding: 1rem; }
+            .welcome-header h1 { font-size: 1.3rem; }
+            .stat-card { padding: 1rem; }
+            .office-card { padding: 1rem; }
+            .filter-buttons { flex-wrap: wrap; gap: 6px; }
         }
     </style>
 </head>
