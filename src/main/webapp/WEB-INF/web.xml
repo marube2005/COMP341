@@ -120,6 +120,16 @@
         <url-pattern>/lecturer/report</url-pattern>
     </servlet-mapping>
 
+    <!-- Lecturer – Daily Check-in -->
+    <servlet>
+        <servlet-name>LecturerCheckinServlet</servlet-name>
+        <servlet-class>com.smartcampus.servlet.LecturerCheckinServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LecturerCheckinServlet</servlet-name>
+        <url-pattern>/lecturer/checkin</url-pattern>
+    </servlet-mapping>
+
     <!-- ═══════════════════════════════════════════════════════ -->
     <!-- Welcome / default page                                  -->
     <!-- ═══════════════════════════════════════════════════════ -->

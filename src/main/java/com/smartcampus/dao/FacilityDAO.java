@@ -112,6 +112,19 @@ public class FacilityDAO {
         }
     }
 
+    /** Returns the facility assigned to the given lecturer, or {@code null} if none. */
+    public Facility findByLecturerId(int lecturerId) throws SQLException {
+        String sql = "SELECT * FROM facilities WHERE assigned_lecturer_id = ? LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lecturerId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapRow(rs);
+            }
+        }
+        return null;
+    }
+
     /** Returns the count of facilities with a specific status. */
     public int countByStatus(Facility.Status status) throws SQLException {
         String sql = "SELECT COUNT(*) FROM facilities WHERE status = ?";
@@ -137,6 +150,8 @@ public class FacilityDAO {
         f.setDescription(rs.getString("description"));
         Timestamp ts = rs.getTimestamp("created_at");
         if (ts != null) f.setCreatedAt(ts.toLocalDateTime());
+        int lecId = rs.getInt("assigned_lecturer_id");
+        if (!rs.wasNull()) f.setAssignedLecturerId(lecId);
         return f;
     }
 }

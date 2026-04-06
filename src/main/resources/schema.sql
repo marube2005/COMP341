@@ -129,6 +129,42 @@ INSERT IGNORE INTO cleaning_tasks (id, facility_id, assigned_to, scheduled_date,
 (2, 3, 3, CURDATE(), 'in_progress', 'Deep clean B101 office');
 
 -- ─────────────────────────────────────────────────────────────
+-- Assigned lecturer per facility (office owner)
+-- ─────────────────────────────────────────────────────────────
+ALTER TABLE facilities ADD COLUMN IF NOT EXISTS assigned_lecturer_id INT NULL;
+ALTER TABLE facilities ADD CONSTRAINT IF NOT EXISTS fk_facility_lecturer
+    FOREIGN KEY (assigned_lecturer_id) REFERENCES users(id) ON DELETE SET NULL;
+
+-- Assign demo lecturer (id=2, Dr. Sarah Wanjiku) to office A101 (id=1)
+UPDATE facilities SET assigned_lecturer_id = 2 WHERE id = 1;
+
+-- ─────────────────────────────────────────────────────────────
+-- Lecturer daily check-ins
+-- ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS lecturer_checkins (
+    id           INT AUTO_INCREMENT PRIMARY KEY,
+    lecturer_id  INT  NOT NULL,
+    facility_id  INT  NOT NULL,
+    checkin_date DATE NOT NULL,
+    created_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_lc_date (lecturer_id, facility_id, checkin_date),
+    CONSTRAINT fk_lc_lecturer FOREIGN KEY (lecturer_id) REFERENCES users(id),
+    CONSTRAINT fk_lc_facility FOREIGN KEY (facility_id) REFERENCES facilities(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────────────────────
+-- Individual cleaning activities per task (checklist items)
+-- ─────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS task_activities (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    task_id    INT          NOT NULL,
+    activity   VARCHAR(100) NOT NULL,
+    is_done    TINYINT(1)   NOT NULL DEFAULT 0,
+    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_ta_task FOREIGN KEY (task_id) REFERENCES cleaning_tasks(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- ─────────────────────────────────────────────────────────────
 -- Janitor reports – filed by lecturers regarding cleaning quality
 -- ─────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS janitor_reports (

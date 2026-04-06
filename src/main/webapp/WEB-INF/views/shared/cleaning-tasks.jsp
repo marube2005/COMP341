@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.smartcampus.model.*,java.util.*" %>
+<%@ page import="com.smartcampus.model.*,com.smartcampus.model.TaskActivity,java.util.*" %>
 <%
     request.setAttribute("activePage", "cleaning");
     String ctx = request.getContextPath();
@@ -20,6 +20,12 @@
     List<User> janitors = (List<User>) request.getAttribute("janitors");
     if (janitors == null) janitors = Collections.emptyList();
 
+    @SuppressWarnings("unchecked")
+    Map<Integer, List<TaskActivity>> activitiesMap =
+        (Map<Integer, List<TaskActivity>>) request.getAttribute("activitiesMap");
+    if (activitiesMap == null) activitiesMap = Collections.emptyMap();
+
+    boolean isJanitor = currentUser != null && currentUser.getRole() == User.Role.janitor;
     boolean canCreate = currentUser != null &&
         (currentUser.getRole() == User.Role.admin || currentUser.getRole() == User.Role.supervisor);
     boolean canDelete = currentUser != null && currentUser.getRole() == User.Role.admin;
@@ -51,6 +57,11 @@
         .badge-status-in_progress { background:#dbeafe; color:#1e40af; }
         .badge-status-completed   { background:#d1fae5; color:#065f46; }
         .badge-status-skipped     { background:#f3f4f6; color:#374151; }
+        .activity-checklist { list-style:none; padding:0; margin:0.4rem 0 0; font-size:0.8rem; }
+        .activity-checklist li { display:flex; align-items:center; gap:6px; padding:3px 0; }
+        .activity-checklist li.done label { text-decoration:line-through; color:#6c757d; }
+        .activity-checklist input[type="checkbox"] { accent-color:#00A651; cursor:pointer; }
+        .activity-checklist label { cursor:pointer; margin:0; }
         @media (max-width: 767.98px) {
             .table-container { padding: 1rem 0.75rem; border-radius:12px; }
             h1 { font-size:1.4rem !important; }
@@ -94,16 +105,53 @@
         <div class="table-responsive">
           <table class="table table-hover align-middle">
             <thead class="table-light">
-              <tr><th>Facility</th><th>Assigned To</th><th>Scheduled Date</th><th>Status</th><th>Notes</th><th>Actions</th></tr>
+              <tr>
+                <th>Facility</th>
+                <th>Assigned To</th>
+                <th>Scheduled Date</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <% if (isJanitor) { %><th>Activities</th><% } %>
+                <th>Actions</th>
+              </tr>
             </thead>
             <tbody>
-              <% for (CleaningTask t : tasks) { %>
+              <% for (CleaningTask t : tasks) {
+                   List<TaskActivity> acts = activitiesMap.getOrDefault(t.getId(), Collections.emptyList());
+              %>
               <tr>
                 <td class="fw-medium"><%= t.getFacilityName() %></td>
                 <td class="text-muted small"><%= t.getAssignedToName() %></td>
                 <td class="text-muted small"><%= t.getScheduledDate() %></td>
                 <td><span class="badge rounded-pill badge-status-<%= t.getStatus().name() %> text-capitalize"><%= t.getStatus().name().replace("_"," ") %></span></td>
                 <td class="text-muted small"><%= t.getNotes() != null ? t.getNotes() : "" %></td>
+                <% if (isJanitor) { %>
+                <td>
+                  <% if (acts.isEmpty()) { %>
+                  <span class="text-muted small">—</span>
+                  <% } else {
+                       boolean dustOnly = acts.size() == 1; %>
+                  <div class="small text-muted mb-1">
+                    <%= dustOnly ? "Dust only" : "Full clean" %>
+                  </div>
+                  <ul class="activity-checklist">
+                    <% for (TaskActivity act : acts) { %>
+                    <li class="<%= act.isDone() ? "done" : "" %>">
+                      <form method="post" action="<%= ctx %>/cleaning-tasks" style="display:contents;">
+                        <input type="hidden" name="action" value="completeActivity">
+                        <input type="hidden" name="activityId" value="<%= act.getId() %>">
+                        <input type="hidden" name="done" value="<%= act.isDone() ? "false" : "true" %>">
+                        <input type="checkbox" id="ta<%= act.getId() %>"
+                               <%= act.isDone() ? "checked" : "" %>
+                               onchange="this.form.submit()">
+                        <label for="ta<%= act.getId() %>"><%= act.getActivity() %></label>
+                      </form>
+                    </li>
+                    <% } %>
+                  </ul>
+                  <% } %>
+                </td>
+                <% } %>
                 <td>
                   <form method="post" action="<%= ctx %>/cleaning-tasks" class="d-flex gap-1">
                     <input type="hidden" name="action" value="updateStatus">

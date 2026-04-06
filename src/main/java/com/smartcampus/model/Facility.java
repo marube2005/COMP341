@@ -23,6 +23,7 @@ public class Facility {
     private Status status;
     private String description;
     private LocalDateTime createdAt;
+    private Integer assignedLecturerId;
 
     public Facility() {}
 
@@ -48,6 +49,7 @@ public class Facility {
     public Status getStatus() { return status; }
     public String getDescription() { return description; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public Integer getAssignedLecturerId() { return assignedLecturerId; }
 
     // ─── Setters ─────────────────────────────────────────────
 
@@ -59,6 +61,7 @@ public class Facility {
     public void setStatus(Status status) { this.status = status; }
     public void setDescription(String description) { this.description = description; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setAssignedLecturerId(Integer assignedLecturerId) { this.assignedLecturerId = assignedLecturerId; }
 
     @Override
     public String toString() {

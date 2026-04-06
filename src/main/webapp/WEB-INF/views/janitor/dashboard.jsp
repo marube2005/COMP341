@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.smartcampus.model.*,java.util.*" %>
+<%@ page import="com.smartcampus.model.*,com.smartcampus.model.TaskActivity,java.util.*" %>
 <%
     request.setAttribute("activePage", "dashboard");
     User currentUser = (User) session.getAttribute("loggedInUser");
@@ -8,6 +8,11 @@
     @SuppressWarnings("unchecked")
     List<CleaningTask> myTasks = (List<CleaningTask>) request.getAttribute("myTasks");
     if (myTasks == null) myTasks = Collections.emptyList();
+
+    @SuppressWarnings("unchecked")
+    Map<Integer, List<TaskActivity>> activitiesMap =
+        (Map<Integer, List<TaskActivity>>) request.getAttribute("activitiesMap");
+    if (activitiesMap == null) activitiesMap = Collections.emptyMap();
 
     int completedCount = 0;
     int pendingCount   = 0;
@@ -96,6 +101,16 @@
         .office-task-row i { color: var(--egerton-green); width: 18px; }
 
         .office-actions { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--border-color); }
+
+        /* Activity checklist */
+        .activity-list { list-style: none; padding: 0; margin: 0.75rem 0 0; }
+        .activity-item { display: flex; align-items: center; gap: 10px; padding: 6px 0;
+                         border-bottom: 1px solid var(--border-color); font-size: 0.875rem; }
+        .activity-item:last-child { border-bottom: none; }
+        .activity-item input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer;
+                                                accent-color: var(--egerton-green); flex-shrink: 0; }
+        .activity-item.done label { text-decoration: line-through; color: var(--text-muted); }
+        .activity-item label { cursor: pointer; margin: 0; }
 
         .filter-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
         .filter-btn { padding: 6px 16px; border-radius: 20px; border: 1px solid var(--border-color);
@@ -190,6 +205,10 @@
                String statusLabel = t.getStatus().name().replace("_", " ");
                String facilityLabel = (t.getFacilityName() != null && !t.getFacilityName().isEmpty())
                                       ? t.getFacilityName() : "Office #" + t.getFacilityId();
+               List<TaskActivity> activities = activitiesMap.getOrDefault(t.getId(), Collections.emptyList());
+               boolean dustOnly = activities.size() == 1;
+               int doneCount    = 0;
+               for (TaskActivity a : activities) { if (a.isDone()) doneCount++; }
           %>
           <div class="office-card" data-status="<%= t.getStatus().name() %>">
             <div class="office-header">
@@ -214,6 +233,33 @@
               </div>
               <% } %>
             </div>
+
+            <!-- Activity Checklist -->
+            <% if (!activities.isEmpty()) { %>
+            <div class="mt-3">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong class="small"><i class="bi bi-list-check text-success"></i>
+                  <%= dustOnly ? "Cleaning Activities (dust only – lecturer not checked in)" : "Cleaning Activities (full clean)" %>
+                </strong>
+                <span class="small text-muted"><%= doneCount %>/<%= activities.size() %> done</span>
+              </div>
+              <ul class="activity-list">
+                <% for (TaskActivity act : activities) { %>
+                <li class="activity-item<%= act.isDone() ? " done" : "" %>">
+                  <form method="post" action="<%= ctx %>/cleaning-tasks" style="display:contents;">
+                    <input type="hidden" name="action" value="completeActivity">
+                    <input type="hidden" name="activityId" value="<%= act.getId() %>">
+                    <input type="hidden" name="done" value="<%= act.isDone() ? "false" : "true" %>">
+                    <input type="checkbox" id="act<%= act.getId() %>"
+                           <%= act.isDone() ? "checked" : "" %>
+                           onchange="this.form.submit()">
+                    <label for="act<%= act.getId() %>"><%= act.getActivity() %></label>
+                  </form>
+                </li>
+                <% } %>
+              </ul>
+            </div>
+            <% } %>
 
             <div class="office-actions">
               <form method="post" action="<%= ctx %>/cleaning-tasks" class="d-flex gap-2 align-items-center">

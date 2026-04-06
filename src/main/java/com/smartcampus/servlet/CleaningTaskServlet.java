@@ -2,8 +2,10 @@ package com.smartcampus.servlet;
 
 import com.smartcampus.dao.CleaningTaskDAO;
 import com.smartcampus.dao.FacilityDAO;
+import com.smartcampus.dao.TaskActivityDAO;
 import com.smartcampus.dao.UserDAO;
 import com.smartcampus.model.CleaningTask;
+import com.smartcampus.model.TaskActivity;
 import com.smartcampus.model.User;
 import com.smartcampus.util.ValidationUtil;
 import jakarta.servlet.ServletException;
@@ -12,6 +14,10 @@ import jakarta.servlet.http.*;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,9 +36,10 @@ public class CleaningTaskServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(CleaningTaskServlet.class.getName());
 
-    private final CleaningTaskDAO ctDAO   = new CleaningTaskDAO();
-    private final FacilityDAO     facDAO  = new FacilityDAO();
-    private final UserDAO         userDAO = new UserDAO();
+    private final CleaningTaskDAO ctDAO       = new CleaningTaskDAO();
+    private final FacilityDAO     facDAO      = new FacilityDAO();
+    private final UserDAO         userDAO     = new UserDAO();
+    private final TaskActivityDAO activityDAO = new TaskActivityDAO();
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -42,14 +49,26 @@ public class CleaningTaskServlet extends HttpServlet {
         if (user == null) { resp.sendRedirect(req.getContextPath() + "/login"); return; }
 
         try {
+            List<CleaningTask> tasks;
             switch (user.getRole()) {
                 case janitor:
-                    req.setAttribute("tasks", ctDAO.findByJanitor(user.getId()));
+                    tasks = ctDAO.findByJanitor(user.getId());
                     break;
                 default:
-                    req.setAttribute("tasks", ctDAO.findAll());
+                    tasks = ctDAO.findAll();
                     break;
             }
+            req.setAttribute("tasks", tasks);
+
+            // For janitors, pre-load (and auto-generate) activities for each task
+            if (user.getRole() == User.Role.janitor) {
+                Map<Integer, List<TaskActivity>> activitiesMap = new LinkedHashMap<>();
+                for (CleaningTask t : tasks) {
+                    activitiesMap.put(t.getId(), activityDAO.findOrGenerateForTask(t));
+                }
+                req.setAttribute("activitiesMap", activitiesMap);
+            }
+
             req.setAttribute("facilities", facDAO.findAll());
             req.setAttribute("janitors",   userDAO.findByRole(User.Role.janitor));
             req.getRequestDispatcher("/WEB-INF/views/shared/cleaning-tasks.jsp").forward(req, resp);
@@ -72,10 +91,11 @@ public class CleaningTaskServlet extends HttpServlet {
 
         try {
             switch (action) {
-                case "create":       handleCreate(req, resp, user); break;
-                case "reassign":     handleReassign(req, resp, user); break;
-                case "updateStatus": handleUpdateStatus(req, resp, user); break;
-                case "delete":       handleDelete(req, resp, user); break;
+                case "create":           handleCreate(req, resp, user); break;
+                case "reassign":         handleReassign(req, resp, user); break;
+                case "updateStatus":     handleUpdateStatus(req, resp, user); break;
+                case "completeActivity": handleCompleteActivity(req, resp, user); break;
+                case "delete":           handleDelete(req, resp, user); break;
                 default: resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action: " + action); break;
             }
         } catch (SQLException e) {
@@ -106,6 +126,27 @@ public class CleaningTaskServlet extends HttpServlet {
         LOGGER.log(Level.INFO, "Task {0} reassigned to janitorId={1} by userId={2}",
                 new Object[]{id, janitorId, user.getId()});
         resp.sendRedirect(req.getContextPath() + "/supervisor/dashboard?success=reassigned");
+    }
+
+    private void handleCompleteActivity(HttpServletRequest req, HttpServletResponse resp, User user)
+            throws IOException, SQLException {
+
+        // Only janitors can tick off their own task activities
+        if (user.getRole() != User.Role.janitor) {
+            resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+            return;
+        }
+
+        int activityId = ValidationUtil.parseIntOrDefault(req.getParameter("activityId"), -1);
+        if (activityId < 1) {
+            resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid activity ID");
+            return;
+        }
+        String doneStr = req.getParameter("done");
+        boolean done = "true".equalsIgnoreCase(doneStr) || "1".equals(doneStr);
+
+        activityDAO.setDone(activityId, done);
+        resp.sendRedirect(req.getContextPath() + "/cleaning-tasks?success=activityUpdated");
     }
 
     // ─── Action handlers ─────────────────────────────────────

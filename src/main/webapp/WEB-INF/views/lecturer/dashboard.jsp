@@ -6,6 +6,12 @@
     String ctx = request.getContextPath();
     String firstName = (currentUser.getName() != null && !currentUser.getName().isEmpty())
                        ? currentUser.getName().split(" ")[0] : "Lecturer";
+
+    Facility assignedOffice = (Facility) request.getAttribute("assignedOffice");
+    Boolean checkedInAttr   = (Boolean) request.getAttribute("checkedInToday");
+    boolean checkedInToday  = Boolean.TRUE.equals(checkedInAttr);
+
+    String checkinParam = request.getParameter("checkin");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -141,18 +147,36 @@
           <div class="col-md-6">
             <div class="info-card">
               <div class="info-icon"><i class="bi bi-building"></i></div>
-              <h3><%= currentUser.getStaffId() != null ? currentUser.getStaffId() : "—" %></h3>
-              <p>My Office</p>
+              <h3><%= assignedOffice != null ? assignedOffice.getName() : "—" %></h3>
+              <p>My Assigned Office</p>
             </div>
           </div>
           <div class="col-md-6">
             <div class="info-card">
               <div class="info-icon"><i class="bi bi-droplet"></i></div>
-              <div id="intensityDisplay"></div>
+              <% if (checkedInToday) { %>
+              <span class="intensity-high">High Intensity</span>
+              <% } else { %>
+              <span class="intensity-low">Low Intensity</span>
+              <% } %>
               <p>Cleaning Intensity</p>
             </div>
           </div>
         </div>
+
+        <% if ("no_office".equals(checkinParam)) { %>
+        <div class="alert alert-warning alert-dismissible fade show">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          You have no assigned office. Please contact the administrator.
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% } else if ("error".equals(checkinParam)) { %>
+        <div class="alert alert-danger alert-dismissible fade show">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          Check-in failed. Please try again.
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <% } %>
 
         <!-- Check-in Card -->
         <div class="checkin-card">
@@ -160,12 +184,26 @@
             <div class="col-8">
               <i class="bi bi-check2-circle"></i>
               <h4 class="mt-2">Daily Check-in</h4>
-              <p id="checkinMessage"></p>
+              <% if (checkedInToday) { %>
+              <p>&#x2705; You have checked in today — full cleaning scheduled for your office.</p>
+              <% } else if (assignedOffice == null) { %>
+              <p>No office assigned. Contact admin to assign an office.</p>
+              <% } else { %>
+              <p>&#x2713; Not checked in — only dusting will be performed in your office today.</p>
+              <% } %>
             </div>
             <div class="col-4 text-end">
-              <button class="btn-checkin" id="checkinBtn">
-                <i class="bi bi-calendar-check"></i> Check In
+              <% if (!checkedInToday && assignedOffice != null) { %>
+              <form method="post" action="<%= ctx %>/lecturer/checkin" style="display:inline;">
+                <button type="submit" class="btn-checkin">
+                  <i class="bi bi-calendar-check"></i> Check In
+                </button>
+              </form>
+              <% } else if (checkedInToday) { %>
+              <button class="btn-checkin" disabled>
+                <i class="bi bi-check-circle"></i> Checked In
               </button>
+              <% } %>
             </div>
           </div>
         </div>
@@ -174,10 +212,41 @@
         <div class="tasks-container">
           <div class="tasks-header d-flex justify-content-between align-items-center">
             <h5><i class="bi bi-brush text-success"></i> Today's Cleaning Tasks</h5>
-            <span id="tasksHeaderBadge"></span>
+            <% if (checkedInToday) { %>
+            <span class="intensity-high">High Intensity (All Activities)</span>
+            <% } else { %>
+            <span class="intensity-low">Low Intensity (Dusting Only)</span>
+            <% } %>
           </div>
-          <div id="tasksList"></div>
-          <div class="mt-3 pt-2 text-center" id="taskProgress"></div>
+          <% if (assignedOffice == null) { %>
+          <p class="text-center text-muted py-4">No office assigned. Contact admin.</p>
+          <% } else if (checkedInToday) { %>
+          <p class="text-muted small mb-2">
+            <i class="bi bi-info-circle text-success"></i>
+            You have checked in. The janitor will perform all cleaning activities for
+            <strong><%= assignedOffice.getName() %></strong>.
+          </p>
+          <ul class="list-group list-group-flush">
+            <% for (String act : com.smartcampus.model.TaskActivity.ALL_ACTIVITIES) { %>
+            <li class="list-group-item py-2 ps-0 border-0">
+              <i class="bi bi-check-circle-fill text-success me-2"></i><%= act %>
+            </li>
+            <% } %>
+          </ul>
+          <% } else { %>
+          <p class="text-muted small mb-2">
+            <i class="bi bi-info-circle text-warning"></i>
+            You have not checked in. Only <strong>dusting</strong> will be performed in
+            <strong><%= assignedOffice.getName() %></strong> today. Check in to request full cleaning.
+          </p>
+          <ul class="list-group list-group-flush">
+            <% for (String act : com.smartcampus.model.TaskActivity.DUST_ONLY) { %>
+            <li class="list-group-item py-2 ps-0 border-0">
+              <i class="bi bi-circle text-muted me-2"></i><%= act %>
+            </li>
+            <% } %>
+          </ul>
+          <% } %>
         </div>
       </div>
 
@@ -245,16 +314,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const lowIntensityTasks  = [{ id: 1, name: "Dusting", completed: false, reported: false }];
-    const highIntensityTasks = [
-        { id: 1, name: "Mopping",                 completed: false, reported: false },
-        { id: 2, name: "Dusting",                 completed: false, reported: false },
-        { id: 3, name: "Emptying Bins",            completed: false, reported: false },
-        { id: 4, name: "Replenishing Stationery",  completed: false, reported: false }
-    ];
-
-    let currentTasks = [];
-    let checkedIn = false;
     let reports = [];
 
     function showToast(message, type) {
@@ -271,132 +330,6 @@
         toastDiv.onclick = () => { toastDiv.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toastDiv.remove(), 300); };
     }
 
-    function updateIntensity() {
-        const intensityDisplay  = document.getElementById('intensityDisplay');
-        const tasksHeaderBadge  = document.getElementById('tasksHeaderBadge');
-        if (!checkedIn) {
-            intensityDisplay.innerHTML  = '<span class="intensity-low">Low Intensity</span>';
-            tasksHeaderBadge.innerHTML  = '<span class="intensity-low">Low Intensity (Dusting Only)</span>';
-        } else {
-            intensityDisplay.innerHTML  = '<span class="intensity-high">High Intensity</span>';
-            tasksHeaderBadge.innerHTML  = '<span class="intensity-high">High Intensity (Full Cleaning - All 4 Tasks)</span>';
-        }
-    }
-
-    function updateCheckinStatus() {
-        const checkinMessage = document.getElementById('checkinMessage');
-        const checkinBtn     = document.getElementById('checkinBtn');
-        if (checkedIn) {
-            const allCompleted = currentTasks.every(t => t.completed);
-            checkinMessage.innerHTML = allCompleted
-                ? '&#x2705; Checked in — All cleaning tasks completed! Office is now clean.'
-                : '&#x2705; Checked in — Office is dirty, intensive cleaning required (All 4 tasks)';
-            checkinBtn.innerHTML  = '<i class="bi bi-check-circle"></i> Checked In';
-            checkinBtn.disabled   = true;
-        } else {
-            checkinMessage.innerHTML = '&#x2713; Not checked in — Office is clean, minimal cleaning needed (Dusting only)';
-            checkinBtn.innerHTML  = '<i class="bi bi-calendar-check"></i> Check In (Office Dirty)';
-            checkinBtn.disabled   = false;
-        }
-    }
-
-    function renderTasks() {
-        const container    = document.getElementById('tasksList');
-        const taskProgress = document.getElementById('taskProgress');
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        if (!currentTasks || currentTasks.length === 0) {
-            container.innerHTML = '<p class="text-center text-muted py-4">No tasks scheduled</p>';
-            taskProgress.innerHTML = '';
-            return;
-        }
-
-        currentTasks.forEach(task => {
-            const taskDiv = document.createElement('div');
-            taskDiv.className = 'task-item';
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'task-checkbox';
-            checkbox.dataset.id = task.id;
-            checkbox.checked  = task.completed;
-            checkbox.disabled = !checkedIn;
-            taskDiv.appendChild(checkbox);
-
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'task-content';
-            const titleP  = document.createElement('p');
-            titleP.className = 'task-title';
-            titleP.textContent = task.name;
-            const statusP = document.createElement('p');
-            statusP.className = 'task-status';
-            statusP.textContent = task.completed ? 'Completed by Janitor' : 'Pending';
-            contentDiv.appendChild(titleP);
-            contentDiv.appendChild(statusP);
-            taskDiv.appendChild(contentDiv);
-
-            const actionDiv = document.createElement('div');
-            if (task.completed) {
-                const reportBtn = document.createElement('button');
-                reportBtn.className = 'report-btn';
-                reportBtn.disabled  = !checkedIn;
-                reportBtn.dataset.taskId   = task.id;
-                reportBtn.dataset.taskName = task.name;
-                reportBtn.innerHTML = '<i class="bi bi-flag"></i> Report Issue';
-                actionDiv.appendChild(reportBtn);
-            } else {
-                const span = document.createElement('span');
-                span.className = 'text-muted small';
-                span.textContent = 'Awaiting completion';
-                actionDiv.appendChild(span);
-            }
-            taskDiv.appendChild(actionDiv);
-
-            container.appendChild(taskDiv);
-        });
-
-        const completedCount = currentTasks.filter(t => t.completed).length;
-        const totalCount     = currentTasks.length;
-        if (checkedIn) {
-            taskProgress.innerHTML = `<small class="text-muted">${completedCount}/${totalCount} tasks completed by janitor</small>`;
-            if (completedCount === totalCount) {
-                taskProgress.innerHTML += '<br><small class="text-success">\u2713 All cleaning tasks completed! Office is now clean.</small>';
-            }
-        } else {
-            taskProgress.innerHTML = '<small class="text-muted">Office is clean. Check in only when office becomes dirty.</small>';
-        }
-    }
-
-    function toggleTask(taskId) {
-        const task = currentTasks.find(t => t.id === taskId);
-        if (task && checkedIn) {
-            const newState = !task.completed;
-            if (newState === false && task.completed === true) {
-                document.querySelector(`.task-checkbox[data-id="${taskId}"]`).checked = true;
-                openReportModal(taskId, task.name);
-                return;
-            }
-            task.completed = newState;
-            if (newState) showToast('\u2713 ' + task.name + ' marked as completed by janitor!', 'success');
-            renderTasks();
-            updateCheckinStatus();
-            saveState();
-        }
-    }
-
-    function openReportModal(taskId, taskName) {
-        document.getElementById('reportTaskId').value      = taskId;
-        document.getElementById('reportTaskName').value    = taskName;
-        document.getElementById('reportTaskDisplay').value = taskName;
-        document.getElementById('reportReason').value      = '';
-        document.getElementById('reportNotes').value       = '';
-        document.getElementById('reportRating').value      = '3';
-        updateStars(3);
-        new bootstrap.Modal(document.getElementById('reportModal')).show();
-    }
-
     function updateStars(value) {
         const stars = document.querySelectorAll('.star-icon');
         const labels = ['', 'Poor', 'Fair', 'Average', 'Good', 'Excellent'];
@@ -407,7 +340,6 @@
         if (label) label.textContent = value ? labels[value] + ' (' + value + '/5)' : 'Select a rating';
     }
 
-    // Star rating interaction
     document.querySelectorAll('.star-icon').forEach(star => {
         star.addEventListener('click', () => {
             const val = parseInt(star.dataset.value);
@@ -419,7 +351,6 @@
     });
 
     function submitReport() {
-        const taskId   = parseInt(document.getElementById('reportTaskId').value);
         const taskName = document.getElementById('reportTaskName').value;
         const rating   = parseInt(document.getElementById('reportRating').value) || 3;
         const reason   = document.getElementById('reportReason').value.trim();
@@ -439,14 +370,10 @@
         .then(data => {
             submitBtn.disabled = false;
             if (data.success) {
-                const task = currentTasks.find(t => t.id === taskId);
-                if (task) task.reported = true;
-                reports.unshift({ id: data.id || Date.now(), taskName, rating, reason, notes,
+                reports.unshift({ taskName, rating, reason, notes,
                                   date: new Date().toLocaleString(), status: 'Submitted' });
                 showToast('Report sent to supervisor regarding "' + taskName + '"', 'info');
                 bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
-                saveState();
-                renderTasks();
                 renderReports();
             } else {
                 showToast(data.message || 'Failed to submit report', 'error');
@@ -456,18 +383,6 @@
             submitBtn.disabled = false;
             showToast('Network error. Please try again.', 'error');
         });
-    }
-
-    function handleCheckIn() {
-        if (!checkedIn) {
-            checkedIn    = true;
-            currentTasks = JSON.parse(JSON.stringify(highIntensityTasks));
-            updateIntensity();
-            updateCheckinStatus();
-            renderTasks();
-            showToast('&#x2713; Checked in! High intensity cleaning scheduled (All 4 tasks).', 'success');
-            saveState();
-        }
     }
 
     function renderReports() {
@@ -496,45 +411,6 @@
         });
     }
 
-    function loadState() {
-        const saved = localStorage.getItem('lecturerDashboardState');
-        if (saved) {
-            try {
-                const state = JSON.parse(saved);
-                // Discard state saved more than 24 hours ago
-                const savedAt = typeof state.savedAt === 'number' ? state.savedAt : 0;
-                if (Date.now() - savedAt > 86400000) throw new Error('expired');
-                checkedIn = state.checkedIn === true;
-                if (checkedIn) {
-                    currentTasks = (Array.isArray(state.currentTasks) && state.currentTasks.length === 4)
-                        ? state.currentTasks : JSON.parse(JSON.stringify(highIntensityTasks));
-                } else {
-                    currentTasks = (Array.isArray(state.currentTasks) && state.currentTasks.length === 1)
-                        ? state.currentTasks : JSON.parse(JSON.stringify(lowIntensityTasks));
-                }
-                reports = Array.isArray(state.reports) ? state.reports : [];
-            } catch(e) {
-                localStorage.removeItem('lecturerDashboardState');
-                checkedIn    = false;
-                currentTasks = JSON.parse(JSON.stringify(lowIntensityTasks));
-                reports      = [];
-            }
-        } else {
-            checkedIn    = false;
-            currentTasks = JSON.parse(JSON.stringify(lowIntensityTasks));
-            reports      = [];
-        }
-        updateIntensity();
-        updateCheckinStatus();
-        renderTasks();
-        renderReports();
-    }
-
-    function saveState() {
-        localStorage.setItem('lecturerDashboardState',
-            JSON.stringify({ checkedIn, currentTasks, reports, savedAt: Date.now() }));
-    }
-
     // Sidebar section navigation (Dashboard / Reports)
     document.querySelectorAll('.nav-link-custom[data-section]').forEach(link => {
         link.addEventListener('click', e => {
@@ -548,21 +424,8 @@
         });
     });
 
-    // Event delegation for task checkboxes and report buttons
-    document.addEventListener('change', e => {
-        if (e.target.classList.contains('task-checkbox')) {
-            toggleTask(parseInt(e.target.dataset.id));
-        }
-    });
-    document.addEventListener('click', e => {
-        const btn = e.target.closest('.report-btn');
-        if (btn) openReportModal(parseInt(btn.dataset.taskId), btn.dataset.taskName);
-    });
-
-    document.getElementById('checkinBtn').addEventListener('click', handleCheckIn);
     document.getElementById('submitReportBtn').addEventListener('click', submitReport);
-
-    loadState();
+    renderReports();
 </script>
 </body>
 </html>
