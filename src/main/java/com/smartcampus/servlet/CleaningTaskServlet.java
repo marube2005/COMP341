@@ -145,8 +145,19 @@ public class CleaningTaskServlet extends HttpServlet {
             doGet(req, resp); return;
         }
 
+        if (scheduledDate.isBefore(LocalDate.now())) {
+            req.setAttribute("error", "Scheduled date must be today or a future date.");
+            doGet(req, resp); return;
+        }
+
+        int facilityId = Integer.parseInt(facilityIdStr.trim());
+        if (ctDAO.existsByFacilityAndDate(facilityId, scheduledDate, -1)) {
+            req.setAttribute("error", "This office is already assigned to a janitor on the selected date.");
+            doGet(req, resp); return;
+        }
+
         CleaningTask task = new CleaningTask();
-        task.setFacilityId(Integer.parseInt(facilityIdStr.trim()));
+        task.setFacilityId(facilityId);
         task.setAssignedTo(Integer.parseInt(janitorIdStr.trim()));
         task.setScheduledDate(scheduledDate);
         task.setStatus(isValidEnum(CleaningTask.Status.class, statusStr)

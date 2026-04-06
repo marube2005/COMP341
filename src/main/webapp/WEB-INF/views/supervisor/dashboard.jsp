@@ -457,7 +457,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold small">Scheduled Date *</label>
-            <input type="date" name="scheduledDate" class="form-control" required>
+            <input type="date" name="scheduledDate" class="form-control" required id="assignOfficeDate">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold small">Notes</label>
@@ -503,6 +503,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    document.getElementById('assignOfficeDate').min = new Date().toISOString().split('T')[0];
+
     function showToast(message, type) {
         const toastDiv = document.createElement('div');
         toastDiv.className = 'custom-toast';

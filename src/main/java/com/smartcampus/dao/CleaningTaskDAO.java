@@ -177,6 +177,31 @@ public class CleaningTaskDAO {
         }
     }
 
+    /**
+     * Returns {@code true} if a cleaning task already exists for the given
+     * facility on the given date (optionally excluding one task by ID, useful
+     * when checking during a reassign operation).
+     *
+     * @param facilityId    the facility to check
+     * @param date          the scheduled date to check
+     * @param excludeTaskId task ID to exclude from the check, or {@code -1} to include all tasks
+     */
+    public boolean existsByFacilityAndDate(int facilityId, LocalDate date, int excludeTaskId)
+            throws SQLException {
+        String sql = excludeTaskId > 0
+                ? "SELECT 1 FROM cleaning_tasks WHERE facility_id=? AND scheduled_date=? AND id<>? LIMIT 1"
+                : "SELECT 1 FROM cleaning_tasks WHERE facility_id=? AND scheduled_date=? LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, facilityId);
+            ps.setDate(2, Date.valueOf(date));
+            if (excludeTaskId > 0) ps.setInt(3, excludeTaskId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     /** Returns the count for today's tasks assigned to a specific janitor. */
     public int countTodayByJanitor(int janitorId) throws SQLException {
         String sql = "SELECT COUNT(*) FROM cleaning_tasks WHERE assigned_to=? AND scheduled_date=CURDATE()";

@@ -168,7 +168,7 @@
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold small">Scheduled Date *</label>
-            <input type="date" name="scheduledDate" class="form-control" required>
+            <input type="date" name="scheduledDate" class="form-control" required id="newTaskDate">
           </div>
           <div class="mb-3">
             <label class="form-label fw-semibold small">Notes</label>
@@ -186,5 +186,7 @@
 <% } %>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
+<script>
+    document.getElementById('newTaskDate').min = new Date().toISOString().split('T')[0];
+</script>
 </html>
