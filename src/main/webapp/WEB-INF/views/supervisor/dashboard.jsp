@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.smartcampus.model.*,java.util.*,java.time.format.DateTimeFormatter" %>
+<%@ page import="com.smartcampus.model.*,java.util.*,java.time.*,java.time.format.DateTimeFormatter" %>
 <%
     request.setAttribute("activePage", "dashboard");
     User currentUser = (User) session.getAttribute("loggedInUser");
@@ -26,6 +26,9 @@
     String errorMsg = (String) request.getAttribute("error");
 
     long pendingCount = 0, inProgressCount = 0, completedCount = 0;
+    long overdueCount = 0;
+    LocalDate today = LocalDate.now();
+    boolean afterDeadline = LocalTime.now().isAfter(LocalTime.of(8, 0));
     for (CleaningTask t : allTasks) {
         switch (t.getStatus()) {
             case pending:     pendingCount++;     break;
@@ -33,8 +36,13 @@
             case completed:   completedCount++;   break;
             default: break;
         }
+      if (afterDeadline && t.getScheduledDate() != null
+              && !t.getScheduledDate().isAfter(today)
+              && t.getStatus() != CleaningTask.Status.completed) {
+          overdueCount++;
+      }
     }
-    long activeAlerts = inProgressCount;
+    long activeAlerts = inProgressCount + overdueCount;
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -251,6 +259,18 @@
         </div>
         <% } %>
 
+        <% if (overdueCount > 0) { %>
+        <div class="alert-card mb-4">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-alarm text-danger fs-4"></i>
+            <div>
+              <strong>Deadline Alert</strong><br>
+              <small><%= overdueCount %> task<%= overdueCount == 1 ? "" : "s" %> missed the 8:00 AM cleaning deadline</small>
+            </div>
+          </div>
+        </div>
+        <% } %>
+
         <!-- Pending Tasks Summary -->
         <div class="table-container">
           <h5><i class="bi bi-list-check text-success"></i> Pending Tasks Summary</h5>
@@ -268,12 +288,20 @@
                  if (t.getStatus() != CleaningTask.Status.pending && t.getStatus() != CleaningTask.Status.in_progress) continue;
                  String statusClass = t.getStatus() == CleaningTask.Status.in_progress ? "status-progress" : "status-pending";
                  String statusText  = t.getStatus() == CleaningTask.Status.in_progress ? "In Progress" : "Pending";
+                boolean deadlineBreached = afterDeadline && t.getScheduledDate() != null
+                        && !t.getScheduledDate().isAfter(today)
+                        && t.getStatus() != CleaningTask.Status.completed;
           %>
           <div class="task-item d-flex align-items-center gap-2">
             <div class="task-content">
               <div class="d-flex justify-content-between align-items-center mb-1">
                 <strong><%= t.getFacilityName() %></strong>
-                <span class="<%= statusClass %>"><%= statusText %></span>
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                  <% if (deadlineBreached) { %>
+                  <span class="status-skipped">Past 8:00 AM</span>
+                  <% } %>
+                  <span class="<%= statusClass %>"><%= statusText %></span>
+                </div>
               </div>
               <div class="d-flex justify-content-between align-items-center">
                 <small class="text-muted">Scheduled: <%= t.getScheduledDate() %></small>
@@ -319,13 +347,23 @@
                      String sc = "status-pending";
                      String sl = "Pending";
                      String ds = "pending";
+                     boolean deadlineBreached = afterDeadline && t.getScheduledDate() != null
+                             && !t.getScheduledDate().isAfter(today)
+                             && t.getStatus() != CleaningTask.Status.completed;
                      if (t.getStatus() == CleaningTask.Status.completed)   { sc = "status-completed"; sl = "Completed";  ds = "completed"; }
                      else if (t.getStatus() == CleaningTask.Status.in_progress) { sc = "status-progress";  sl = "In Progress"; ds = "in_progress"; }
                      else if (t.getStatus() == CleaningTask.Status.skipped) { sc = "status-skipped";   sl = "Skipped";    ds = "skipped"; }
                 %>
                 <tr data-status="<%= ds %>">
                   <td><strong><%= t.getFacilityName() %></strong></td>
-                  <td><span class="<%= sc %>"><%= sl %></span></td>
+                  <td>
+                    <div class="d-flex flex-column gap-1">
+                      <% if (deadlineBreached) { %>
+                      <span class="status-skipped">Past 8:00 AM</span>
+                      <% } %>
+                      <span class="<%= sc %>"><%= sl %></span>
+                    </div>
+                  </td>
                   <td><%= t.getScheduledDate() %></td>
                   <td><%= t.getAssignedToName() != null ? t.getAssignedToName() : "Unassigned" %></td>
                   <td>
@@ -413,7 +451,12 @@
                 <% for (JanitorReport r : lecturerReports) { %>
                 <tr>
                   <td><strong><%= r.getLecturerName() != null ? r.getLecturerName() : "Unknown" %></strong></td>
-                  <td><%= r.getTaskName() %></td>
+                  <td>
+                    <div><%= r.getTaskName() %></div>
+                    <% if (r.getActivityName() != null && !r.getActivityName().isEmpty()) { %>
+                    <small class="text-muted"><%= r.getActivityName() %></small>
+                    <% } %>
+                  </td>
                   <td>
                     <%
                       int stars = r.getRating();

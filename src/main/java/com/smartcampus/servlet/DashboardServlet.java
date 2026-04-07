@@ -10,12 +10,14 @@ import com.smartcampus.model.CleaningTask;
 import com.smartcampus.model.Facility;
 import com.smartcampus.model.TaskActivity;
 import com.smartcampus.model.User;
+import com.smartcampus.util.CampusCalendarUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -67,12 +69,30 @@ public class DashboardServlet extends HttpServlet {
                 case lecturer:
                     Facility assignedOffice = facDAO.findByLecturerId(user.getId());
                     req.setAttribute("assignedOffice", assignedOffice);
+                    LocalDate today = LocalDate.now();
+                    boolean workingDay = CampusCalendarUtil.isWorkingDay(today);
+                    req.setAttribute("workingDay", workingDay);
+                    req.setAttribute("calendarNotice", CampusCalendarUtil.getDayNotice(today));
                     boolean checkedInToday = false;
-                    if (assignedOffice != null) {
+                    if (assignedOffice != null && workingDay) {
                         checkedInToday = checkinDAO.hasCheckedIn(
-                                user.getId(), assignedOffice.getId(), LocalDate.now());
+                                user.getId(), assignedOffice.getId(), today);
                     }
                     req.setAttribute("checkedInToday", checkedInToday);
+                    List<CleaningTask> officeTasks = new ArrayList<>();
+                    if (assignedOffice != null && workingDay) {
+                        for (CleaningTask task : ctDAO.findByDate(today)) {
+                            if (task.getFacilityId() == assignedOffice.getId()) {
+                                officeTasks.add(task);
+                            }
+                        }
+                    }
+                    req.setAttribute("officeTasks", officeTasks);
+                    Map<Integer, List<TaskActivity>> lecturerActivitiesMap = new LinkedHashMap<>();
+                    for (CleaningTask task : officeTasks) {
+                        lecturerActivitiesMap.put(task.getId(), activityDAO.findOrGenerateForTask(task));
+                    }
+                    req.setAttribute("activitiesMap", lecturerActivitiesMap);
                     req.setAttribute("facilities",    facDAO.findByStatus(Facility.Status.available));
                     jspPath = "/WEB-INF/views/lecturer/dashboard.jsp";
                     break;
@@ -82,11 +102,11 @@ public class DashboardServlet extends HttpServlet {
                     req.setAttribute("todayCount", ctDAO.countTodayByJanitor(user.getId()));
 
                     // Pre-load (and auto-generate) activity checklists for each task
-                    Map<Integer, List<TaskActivity>> activitiesMap = new LinkedHashMap<>();
+                    Map<Integer, List<TaskActivity>> janitorActivitiesMap = new LinkedHashMap<>();
                     for (CleaningTask t : myTasks) {
-                        activitiesMap.put(t.getId(), activityDAO.findOrGenerateForTask(t));
+                        janitorActivitiesMap.put(t.getId(), activityDAO.findOrGenerateForTask(t));
                     }
-                    req.setAttribute("activitiesMap", activitiesMap);
+                    req.setAttribute("activitiesMap", janitorActivitiesMap);
                     jspPath = "/WEB-INF/views/janitor/dashboard.jsp";
                     break;
                 case supervisor:

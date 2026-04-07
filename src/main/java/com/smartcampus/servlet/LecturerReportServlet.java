@@ -62,6 +62,7 @@ public class LecturerReportServlet extends HttpServlet {
 
         // ── Parameter extraction ──────────────────────────────
         String taskName = req.getParameter("taskName");
+        String activityName = req.getParameter("activityName");
         String ratingStr = req.getParameter("rating");
         String reason   = req.getParameter("reason");
         String notes    = req.getParameter("notes");
@@ -91,6 +92,7 @@ public class LecturerReportServlet extends HttpServlet {
         JanitorReport report = new JanitorReport();
         report.setLecturerId(user.getId());
         report.setTaskName(taskName.trim());
+        report.setActivityName(activityName != null && !activityName.isBlank() ? activityName.trim() : null);
         report.setRating(rating);
         report.setReason(reason.trim());
         report.setNotes(notes != null ? notes.trim() : null);
