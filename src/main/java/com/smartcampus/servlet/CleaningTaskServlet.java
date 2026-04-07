@@ -27,9 +27,9 @@ import java.util.logging.Logger;
  * <p>Supported actions (via the {@code action} request parameter on POST):
  * <ul>
  *   <li>GET  /cleaning-tasks            – list tasks (filtered by role)</li>
- *   <li>POST /cleaning-tasks?action=create       – create a task (admin/supervisor)</li>
- *   <li>POST /cleaning-tasks?action=updateStatus – update task status (janitor/admin/supervisor)</li>
- *   <li>POST /cleaning-tasks?action=delete       – delete a task (admin only)</li>
+ *   <li>POST /cleaning-tasks?action=create       – create a task (supervisor only)</li>
+ *   <li>POST /cleaning-tasks?action=updateStatus – update task status (janitor/supervisor)</li>
+ *   <li>POST /cleaning-tasks?action=delete       – delete a task (supervisor only)</li>
  * </ul>
  */
 public class CleaningTaskServlet extends HttpServlet {
@@ -54,9 +54,12 @@ public class CleaningTaskServlet extends HttpServlet {
                 case janitor:
                     tasks = ctDAO.findByJanitor(user.getId());
                     break;
-                default:
+                case supervisor:
                     tasks = ctDAO.findAll();
                     break;
+                default:
+                    resp.sendError(HttpServletResponse.SC_FORBIDDEN);
+                    return;
             }
             req.setAttribute("tasks", tasks);
 
@@ -107,7 +110,7 @@ public class CleaningTaskServlet extends HttpServlet {
     private void handleReassign(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException, SQLException {
 
-        if (user.getRole() != User.Role.admin && user.getRole() != User.Role.supervisor) {
+        if (user.getRole() != User.Role.supervisor) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -154,7 +157,7 @@ public class CleaningTaskServlet extends HttpServlet {
     private void handleCreate(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException, ServletException, SQLException {
 
-        if (user.getRole() != User.Role.admin && user.getRole() != User.Role.supervisor) {
+        if (user.getRole() != User.Role.supervisor) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -233,8 +236,8 @@ public class CleaningTaskServlet extends HttpServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-        } else if (user.getRole() != User.Role.admin && user.getRole() != User.Role.supervisor) {
-            // Only admin/supervisor may update arbitrary tasks
+        } else if (user.getRole() != User.Role.supervisor) {
+            // Only supervisors may update arbitrary tasks
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
@@ -246,7 +249,7 @@ public class CleaningTaskServlet extends HttpServlet {
     private void handleDelete(HttpServletRequest req, HttpServletResponse resp, User user)
             throws IOException, SQLException {
 
-        if (user.getRole() != User.Role.admin) {
+        if (user.getRole() != User.Role.supervisor) {
             resp.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }

@@ -13,6 +13,7 @@ public class JanitorReport {
     private int           lecturerId;
     private String        lecturerName;
     private String        taskName;
+    private String        activityName;
     private int           rating;
     private String        reason;
     private String        notes;
@@ -33,6 +34,9 @@ public class JanitorReport {
 
     public String getTaskName()                  { return taskName; }
     public void   setTaskName(String taskName)   { this.taskName = taskName; }
+
+    public String getActivityName()                     { return activityName; }
+    public void   setActivityName(String activityName)   { this.activityName = activityName; }
 
     public int  getRating()              { return rating; }
     public void setRating(int rating)    { this.rating = rating; }

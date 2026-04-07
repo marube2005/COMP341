@@ -1,5 +1,5 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="com.smartcampus.model.*,java.util.*" %>
+<%@ page import="com.smartcampus.model.*,java.util.*,java.time.*" %>
 <%
     request.setAttribute("activePage", "dashboard");
     User currentUser = (User) session.getAttribute("loggedInUser");
@@ -10,9 +10,27 @@
     Facility assignedOffice = (Facility) request.getAttribute("assignedOffice");
     Boolean checkedInAttr   = (Boolean) request.getAttribute("checkedInToday");
     boolean checkedInToday  = Boolean.TRUE.equals(checkedInAttr);
+    Boolean workingDayAttr  = (Boolean) request.getAttribute("workingDay");
+    boolean workingDay      = workingDayAttr == null || Boolean.TRUE.equals(workingDayAttr);
+    String calendarNotice    = (String) request.getAttribute("calendarNotice");
+    @SuppressWarnings("unchecked")
+    List<CleaningTask> officeTasks = (List<CleaningTask>) request.getAttribute("officeTasks");
+    if (officeTasks == null) officeTasks = Collections.emptyList();
+    @SuppressWarnings("unchecked")
+    Map<Integer, List<TaskActivity>> activitiesMap = (Map<Integer, List<TaskActivity>>) request.getAttribute("activitiesMap");
+    if (activitiesMap == null) activitiesMap = Collections.emptyMap();
 
     String checkinParam = request.getParameter("checkin");
 %>
+  <%!
+    private String escAttr(String value) {
+      if (value == null) return "";
+      return value.replace("&", "&amp;")
+            .replace("\"", "&quot;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;");
+    }
+  %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -98,6 +116,16 @@
         .task-title  { font-weight: 600; color: var(--text-dark); font-size: 0.9rem; margin-bottom: 0; }
         .task-status { font-size: 0.7rem; color: var(--text-muted); }
 
+        .task-review-card { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 16px; padding: 1rem; }
+        .review-panel { background: white; border: 1px dashed var(--border-color); border-radius: 16px; padding: 1rem; }
+        .review-panel textarea, .review-panel input { border-radius: 12px; }
+        .task-star-icon { font-size: 1.4rem; cursor: pointer; color: #ccc; transition: color 0.15s, transform 0.15s; }
+        .task-star-icon:hover { transform: translateY(-1px); }
+        .task-star-icon.active { color: #f0a500; }
+        .activity-status-note { font-size: 0.75rem; color: var(--text-muted); }
+        .activity-toggle-disabled { cursor: not-allowed; opacity: 0.72; }
+        .deadline-badge { background: #fee2e2; color: #b91c1c; border-radius: 999px; padding: 0.25rem 0.65rem; font-size: 0.75rem; font-weight: 700; }
+
         .report-btn { background: none; border: none; color: #dc3545; font-size: 0.7rem;
                       cursor: pointer; padding: 4px 8px; border-radius: 20px; transition: all 0.2s; }
         .report-btn:hover { background: #fee2e2; }
@@ -170,6 +198,12 @@
           You have no assigned office. Please contact the administrator.
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+        <% } else if ("weekend".equals(checkinParam) || "holiday".equals(checkinParam)) { %>
+        <div class="alert alert-info alert-dismissible fade show">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          <%= calendarNotice != null && !calendarNotice.isEmpty() ? calendarNotice : "Today is not a working day." %>
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
         <% } else if ("error".equals(checkinParam)) { %>
         <div class="alert alert-danger alert-dismissible fade show">
           <i class="bi bi-exclamation-triangle-fill me-2"></i>
@@ -184,7 +218,9 @@
             <div class="col-8">
               <i class="bi bi-check2-circle"></i>
               <h4 class="mt-2">Daily Check-in</h4>
-              <% if (checkedInToday) { %>
+              <% if (!workingDay) { %>
+              <p><%= calendarNotice != null && !calendarNotice.isEmpty() ? calendarNotice : "Today is not a working day." %></p>
+              <% } else if (checkedInToday) { %>
               <p>&#x2705; You have checked in today — full cleaning scheduled for your office.</p>
               <% } else if (assignedOffice == null) { %>
               <p>No office assigned. Contact admin to assign an office.</p>
@@ -193,7 +229,7 @@
               <% } %>
             </div>
             <div class="col-4 text-end">
-              <% if (!checkedInToday && assignedOffice != null) { %>
+              <% if (workingDay && !checkedInToday && assignedOffice != null) { %>
               <form method="post" action="<%= ctx %>/lecturer/checkin" style="display:inline;">
                 <button type="submit" class="btn-checkin">
                   <i class="bi bi-calendar-check"></i> Check In
@@ -203,6 +239,10 @@
               <button class="btn-checkin" disabled>
                 <i class="bi bi-check-circle"></i> Checked In
               </button>
+              <% } else if (!workingDay) { %>
+              <button class="btn-checkin" disabled>
+                <i class="bi bi-calendar-x"></i> Closed Today
+              </button>
               <% } %>
             </div>
           </div>
@@ -210,9 +250,14 @@
 
         <!-- Today's Cleaning Tasks -->
         <div class="tasks-container">
-          <div class="tasks-header d-flex justify-content-between align-items-center">
-            <h5><i class="bi bi-brush text-success"></i> Today's Cleaning Tasks</h5>
-            <% if (checkedInToday) { %>
+          <div class="tasks-header d-flex justify-content-between align-items-center gap-2 flex-wrap">
+            <div>
+              <h5 class="mb-1"><i class="bi bi-brush text-success"></i> Today's Cleaning Tasks</h5>
+              <p class="text-muted small mb-0">Uncheck a completed item to notify the supervisor.</p>
+            </div>
+            <% if (!workingDay) { %>
+            <span class="intensity-low">Closed Today</span>
+            <% } else if (checkedInToday) { %>
             <span class="intensity-high">High Intensity (All Activities)</span>
             <% } else { %>
             <span class="intensity-low">Low Intensity (Dusting Only)</span>
@@ -220,34 +265,131 @@
           </div>
           <% if (assignedOffice == null) { %>
           <p class="text-center text-muted py-4">No office assigned. Contact admin.</p>
-          <% } else if (checkedInToday) { %>
-          <p class="text-muted small mb-2">
-            <i class="bi bi-info-circle text-success"></i>
-            You have checked in. The janitor will perform all cleaning activities for
-            <strong><%= assignedOffice.getName() %></strong>.
-          </p>
-          <ul class="list-group list-group-flush">
-            <% for (String act : com.smartcampus.model.TaskActivity.ALL_ACTIVITIES) { %>
-            <li class="list-group-item py-2 ps-0 border-0">
-              <i class="bi bi-check-circle-fill text-success me-2"></i><%= act %>
-            </li>
-            <% } %>
-          </ul>
-          <% } else { %>
+          <% } else if (!workingDay) { %>
           <p class="text-muted small mb-2">
             <i class="bi bi-info-circle text-warning"></i>
-            You have not checked in. Only <strong>dusting</strong> will be performed in
-            <strong><%= assignedOffice.getName() %></strong> today. Check in to request full cleaning.
+            <%= calendarNotice != null && !calendarNotice.isEmpty() ? calendarNotice : "Today is not a working day." %>
+            Cleaning will resume on the next working day.
           </p>
-          <ul class="list-group list-group-flush">
-            <% for (String act : com.smartcampus.model.TaskActivity.DUST_ONLY) { %>
-            <li class="list-group-item py-2 ps-0 border-0">
-              <i class="bi bi-circle text-muted me-2"></i><%= act %>
-            </li>
+          <div class="alert alert-light border text-muted mb-0">
+            Office access is closed today, so no check-in or cleaning activity is scheduled.
+          </div>
+          <% } else if (officeTasks == null || officeTasks.isEmpty()) { %>
+          <div class="alert alert-light border text-muted mb-0">
+            No cleaning task has been scheduled yet for <strong><%= assignedOffice.getName() %></strong>.
+          </div>
+          <% } else { %>
+          <p class="text-muted small mb-2">
+            <i class="bi bi-info-circle text-success"></i>
+            <% if (checkedInToday) { %>
+            You have checked in. Full cleaning has been scheduled for <strong><%= assignedOffice.getName() %></strong>.
+            <% } else { %>
+            You have not checked in. Only dusting is scheduled for <strong><%= assignedOffice.getName() %></strong> today.
             <% } %>
-          </ul>
+          </p>
+
+          <% for (CleaningTask task : officeTasks) {
+               List<TaskActivity> activities = activitiesMap.getOrDefault(task.getId(), Collections.emptyList());
+               boolean deadlinePassed = task.getScheduledDate() != null
+                       && task.getScheduledDate().isEqual(LocalDate.now())
+                       && LocalTime.now().isAfter(LocalTime.of(8, 0))
+                       && task.getStatus() != CleaningTask.Status.completed;
+               String taskLabel = (assignedOffice.getName() != null && !assignedOffice.getName().isEmpty())
+                                  ? assignedOffice.getName() : ("Task #" + task.getId());
+          %>
+          <div class="task-review-card mb-3" data-task-id="<%= task.getId() %>">
+            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+              <div>
+                <strong><%= taskLabel %></strong>
+                <div class="task-status">Scheduled for <%= task.getScheduledDate() %></div>
+              </div>
+              <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                <% if (deadlinePassed) { %>
+                <span class="deadline-badge">Past 8:00 AM deadline</span>
+                <% } %>
+                <button type="button"
+                        class="btn btn-outline-danger btn-sm report-btn"
+                        data-task-id="<%= task.getId() %>"
+                        data-task-name="<%= escAttr(taskLabel) %>"
+                        onclick="openReportPanel(this)">
+                  <i class="bi bi-flag me-1"></i> Report
+                </button>
+              </div>
+            </div>
+
+            <div class="activity-list">
+              <% for (TaskActivity act : activities) {
+                   boolean done = act.isDone();
+              %>
+              <div class="task-item<%= done ? " done" : "" %>">
+                <input type="checkbox"
+                       class="task-checkbox"
+                       <%= done ? "checked" : "" %>
+                       <%= done ? "" : "disabled" %>
+                       data-task-id="<%= task.getId() %>"
+                       data-task-name="<%= escAttr(taskLabel) %>"
+                       data-activity-name="<%= escAttr(act.getActivity()) %>"
+                       onchange="handleActivityToggle(this)">
+                <div class="task-content">
+                  <p class="task-title"><%= act.getActivity() %></p>
+                  <div class="task-status">
+                    <%= done ? "Completed by janitor" : "Awaiting janitor" %>
+                  </div>
+                </div>
+                <% if (done) { %>
+                <button type="button"
+                        class="report-btn"
+                        data-task-id="<%= task.getId() %>"
+                        data-task-name="<%= escAttr(taskLabel) %>"
+                        data-activity-name="<%= escAttr(act.getActivity()) %>"
+                        onclick="openReportPanel(this)">
+                  Report
+                </button>
+                <% } else { %>
+                <span class="activity-status-note">Locked until janitor completes it</span>
+                <% } %>
+              </div>
+              <% } %>
+            </div>
+
+            <div class="review-panel mt-3 d-none" id="reportPanel-<%= task.getId() %>">
+              <div class="d-flex justify-content-between align-items-center gap-2 mb-2">
+                <div>
+                  <strong class="small">Supervisor report</strong>
+                  <div class="activity-status-note" id="reportTarget-<%= task.getId() %>">Select a completed item to report dissatisfaction.</div>
+                </div>
+                <span class="review-pill">5-star rating</span>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Cleaning quality rating</label>
+                <div class="d-flex gap-1 align-items-center task-star-group" data-task-id="<%= task.getId() %>">
+                  <% for (int s = 1; s <= 5; s++) { %>
+                  <i class="bi bi-star-fill task-star-icon<%= s == 5 ? " active" : "" %>"
+                     data-value="<%= s %>"
+                     title="<%= s %> star<%= s > 1 ? "s" : "" %>"></i>
+                  <% } %>
+                  <small class="text-muted ms-2" id="ratingLabel-<%= task.getId() %>">Select a rating</small>
+                </div>
+                <input type="hidden" id="reportRating-<%= task.getId() %>" value="5">
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Reason for dissatisfaction</label>
+                <textarea class="form-control" id="reportReason-<%= task.getId() %>" rows="3"
+                          placeholder="Explain what was not completed properly..." required></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold small">Additional notes</label>
+                <input type="text" class="form-control" id="reportNotes-<%= task.getId() %>" placeholder="Optional details for the supervisor">
+              </div>
+              <div class="d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeReportPanel(<%= task.getId() %>)">Cancel</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="submitTaskReport(<%= task.getId() %>)">Send Report</button>
+              </div>
+            </div>
+          </div>
           <% } %>
         </div>
+        <% } %>
       </div>
 
       <!-- Reports Section -->
@@ -255,59 +397,12 @@
         <div class="tasks-container">
           <div class="tasks-header">
             <h5><i class="bi bi-flag text-success"></i> My Dissatisfaction Reports</h5>
-            <p class="text-muted small">Reports sent to supervisor when you uncheck completed tasks</p>
+            <p class="text-muted small">Reports sent to the supervisor when you flag completed work</p>
           </div>
           <div id="reportsList"></div>
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
-
-<!-- Report Modal -->
-<div class="modal fade modal-custom" id="reportModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title"><i class="bi bi-flag"></i> Report Issue</h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body">
-        <form id="reportForm">
-          <input type="hidden" id="reportTaskId">
-          <input type="hidden" id="reportTaskName">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Task</label>
-            <input type="text" class="form-control" id="reportTaskDisplay" readonly>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Cleaning Quality Rating</label>
-            <div class="d-flex gap-2 align-items-center" id="starRating">
-              <% for (int s = 1; s <= 5; s++) { %>
-              <i class="bi bi-star-fill star-icon" data-value="<%= s %>"
-                 style="font-size:1.5rem;cursor:pointer;color:#ccc;transition:color 0.15s;"
-                 title="<%= s %> star<%= s > 1 ? "s" : "" %>"></i>
-              <% } %>
-              <small class="text-muted ms-1" id="ratingLabel">Select a rating</small>
-            </div>
-            <input type="hidden" id="reportRating" value="3">
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Reason for Dissatisfaction</label>
-            <textarea class="form-control" id="reportReason" rows="3"
-                      placeholder="Please explain why you're unsatisfied with this task..." required></textarea>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Additional Notes</label>
-            <input type="text" class="form-control" id="reportNotes" placeholder="Any additional comments">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-primary" id="submitReportBtn">Submit Report</button>
-      </div>
     </div>
   </div>
 </div>
@@ -330,59 +425,106 @@
         toastDiv.onclick = () => { toastDiv.style.animation = 'slideOut 0.3s ease'; setTimeout(() => toastDiv.remove(), 300); };
     }
 
-    function updateStars(value) {
-        const stars = document.querySelectorAll('.star-icon');
-        const labels = ['', 'Poor', 'Fair', 'Average', 'Good', 'Excellent'];
-        stars.forEach(s => {
-            s.style.color = parseInt(s.dataset.value) <= value ? '#f0a500' : '#ccc';
-        });
-        const label = document.getElementById('ratingLabel');
-        if (label) label.textContent = value ? labels[value] + ' (' + value + '/5)' : 'Select a rating';
+    function escapeHtml(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
-    document.querySelectorAll('.star-icon').forEach(star => {
+    function updateTaskStars(taskId, value) {
+      const stars = document.querySelectorAll('.task-star-group[data-task-id="' + taskId + '"] .task-star-icon');
+      const labels = ['', 'Poor', 'Fair', 'Average', 'Good', 'Excellent'];
+      stars.forEach(star => {
+        const active = parseInt(star.dataset.value) <= value;
+        star.classList.toggle('active', active);
+      });
+      const label = document.getElementById('ratingLabel-' + taskId);
+      if (label) label.textContent = value ? labels[value] + ' (' + value + '/5)' : 'Select a rating';
+    }
+
+    document.querySelectorAll('.task-star-group').forEach(group => {
+      const taskId = group.dataset.taskId;
+      group.querySelectorAll('.task-star-icon').forEach(star => {
         star.addEventListener('click', () => {
-            const val = parseInt(star.dataset.value);
-            document.getElementById('reportRating').value = val;
-            updateStars(val);
+          const val = parseInt(star.dataset.value);
+          document.getElementById('reportRating-' + taskId).value = val;
+          updateTaskStars(taskId, val);
         });
-        star.addEventListener('mouseover', () => updateStars(parseInt(star.dataset.value)));
-        star.addEventListener('mouseout',  () => updateStars(parseInt(document.getElementById('reportRating').value) || 3));
+        star.addEventListener('mouseover', () => updateTaskStars(taskId, parseInt(star.dataset.value)));
+        star.addEventListener('mouseout', () => updateTaskStars(taskId, parseInt(document.getElementById('reportRating-' + taskId).value) || 5));
+      });
+      updateTaskStars(taskId, parseInt(document.getElementById('reportRating-' + taskId).value) || 5);
     });
 
-    function submitReport() {
-        const taskName = document.getElementById('reportTaskName').value;
-        const rating   = parseInt(document.getElementById('reportRating').value) || 3;
-        const reason   = document.getElementById('reportReason').value.trim();
-        const notes    = document.getElementById('reportNotes').value.trim();
-        if (!reason) { showToast('Please provide a reason for your dissatisfaction', 'error'); return; }
+    function openReportPanel(trigger) {
+      const taskId = trigger.getAttribute('data-task-id');
+      const taskName = trigger.getAttribute('data-task-name') || '';
+      const activityName = trigger.getAttribute('data-activity-name') || '';
+      const panel = document.getElementById('reportPanel-' + taskId);
+      const target = document.getElementById('reportTarget-' + taskId);
+      if (panel) {
+        panel.dataset.taskName = taskName;
+        panel.dataset.activityName = activityName;
+      }
+      if (target) {
+        target.textContent = activityName
+          ? 'Reporting "' + activityName + '" for ' + taskName
+          : 'Reporting cleaning work for ' + taskName;
+      }
+      if (panel) {
+        panel.classList.remove('d-none');
+        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
 
-        const submitBtn = document.getElementById('submitReportBtn');
-        submitBtn.disabled = true;
+    function closeReportPanel(taskId) {
+      const panel = document.getElementById('reportPanel-' + taskId);
+      if (panel) panel.classList.add('d-none');
+    }
 
-        const params = new URLSearchParams({ taskName, rating, reason, notes });
-        fetch(window.location.origin + document.querySelector('meta[name="ctx"]').content + '/lecturer/report', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: params.toString()
-        })
-        .then(r => r.json())
-        .then(data => {
-            submitBtn.disabled = false;
-            if (data.success) {
-                reports.unshift({ taskName, rating, reason, notes,
-                                  date: new Date().toLocaleString(), status: 'Submitted' });
-                showToast('Report sent to supervisor regarding "' + taskName + '"', 'info');
-                bootstrap.Modal.getInstance(document.getElementById('reportModal')).hide();
-                renderReports();
-            } else {
-                showToast(data.message || 'Failed to submit report', 'error');
-            }
-        })
-        .catch(() => {
-            submitBtn.disabled = false;
-            showToast('Network error. Please try again.', 'error');
-        });
+    function handleActivityToggle(checkbox) {
+      if (checkbox.checked) return;
+      openReportPanel(checkbox);
+    }
+
+    function submitTaskReport(taskId) {
+      const panel = document.getElementById('reportPanel-' + taskId);
+      const taskName = panel?.dataset.taskName || document.querySelector('.task-checkbox[data-task-id="' + taskId + '"]')?.dataset.taskName || '';
+      const activityName = panel?.dataset.activityName || '';
+      const rating = parseInt(document.getElementById('reportRating-' + taskId).value) || 5;
+      const reason = document.getElementById('reportReason-' + taskId).value.trim();
+      const notes = document.getElementById('reportNotes-' + taskId).value.trim();
+      if (!reason) { showToast('Please provide a reason for your dissatisfaction', 'error'); return; }
+
+      const submitBtn = document.querySelector('#reportPanel-' + taskId + ' button.btn-primary');
+      if (submitBtn) submitBtn.disabled = true;
+
+      const params = new URLSearchParams({ taskName, activityName, rating, reason, notes });
+      fetch(window.location.origin + document.querySelector('meta[name="ctx"]').content + '/lecturer/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (submitBtn) submitBtn.disabled = false;
+        if (data.success) {
+          reports.unshift({ taskName, activityName, rating, reason, notes,
+                    date: new Date().toLocaleString(), status: 'Submitted' });
+          showToast('Report sent to supervisor regarding "' + (activityName || taskName) + '"', 'info');
+          closeReportPanel(taskId);
+          renderReports();
+        } else {
+          showToast(data.message || 'Failed to submit report', 'error');
+        }
+      })
+      .catch(() => {
+        if (submitBtn) submitBtn.disabled = false;
+        showToast('Network error. Please try again.', 'error');
+      });
     }
 
     function renderReports() {
@@ -394,19 +536,27 @@
         }
         container.innerHTML = '';
         reports.forEach(report => {
-            const stars = Array.from({length: 5}, (_, i) =>
-                `<i class="bi bi-star${i < (report.rating || 3) ? '-fill' : ''}" style="color:${i < (report.rating || 3) ? '#f0a500' : '#ccc'};font-size:0.9rem;"></i>`
-            ).join('');
+            const stars = Array.from({ length: 5 }, (_, i) => {
+              const active = i < (report.rating || 5);
+              return '<i class="bi bi-star' + (active ? '-fill' : '') + '" style="color:' + (active ? '#f0a500' : '#ccc') + ';font-size:0.9rem;"></i>';
+            }).join('');
+            const activityLine = report.activityName
+              ? '<p class="text-muted small mb-1"><strong>Activity:</strong> ' + escapeHtml(report.activityName) + '</p>'
+              : '';
+            const notesLine = report.notes
+              ? '<p class="text-muted small"><strong>Notes:</strong> ' + escapeHtml(report.notes) + '</p>'
+              : '';
             const div = document.createElement('div');
             div.className = 'task-item';
-            div.innerHTML = `
-                <div class="task-content">
-                    <p class="task-title"><strong>${report.taskName}</strong> - ${report.date}</p>
-                    <p class="text-muted small mb-1">${stars}</p>
-                    <p class="text-muted small mb-1"><strong>Reason:</strong> ${report.reason}</p>
-                    \${report.notes ? `<p class="text-muted small"><strong>Notes:</strong> ${report.notes}</p>` : ''}
-                    <span class="badge bg-warning text-dark">${report.status}</span>
-                </div>`;
+            div.innerHTML = '' +
+                '<div class="task-content">' +
+                '<p class="task-title"><strong>' + escapeHtml(report.taskName) + '</strong> - ' + escapeHtml(report.date) + '</p>' +
+                '<p class="text-muted small mb-1">' + stars + '</p>' +
+                activityLine +
+                '<p class="text-muted small mb-1"><strong>Reason:</strong> ' + escapeHtml(report.reason) + '</p>' +
+                notesLine +
+                '<span class="badge bg-warning text-dark">' + escapeHtml(report.status) + '</span>' +
+                '</div>';
             container.appendChild(div);
         });
     }
@@ -424,7 +574,6 @@
         });
     });
 
-    document.getElementById('submitReportBtn').addEventListener('click', submitReport);
     renderReports();
 </script>
 </body>

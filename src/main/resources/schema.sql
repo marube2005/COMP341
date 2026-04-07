@@ -171,9 +171,12 @@ CREATE TABLE janitor_reports (
     id              INT AUTO_INCREMENT PRIMARY KEY,
     lecturer_id     INT           NOT NULL,
     task_name       VARCHAR(200)  NOT NULL,
+    activity_name   VARCHAR(200),
     rating          TINYINT       NOT NULL DEFAULT 3,   -- 1 (poor) to 5 (excellent)
     reason          TEXT          NOT NULL,
     notes           TEXT,
     reported_at     DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_jr_lecturer FOREIGN KEY (lecturer_id) REFERENCES users(id)
 ) ENGINE=InnoDB;
+
+ALTER TABLE janitor_reports ADD COLUMN activity_name VARCHAR(200) NULL AFTER task_name;

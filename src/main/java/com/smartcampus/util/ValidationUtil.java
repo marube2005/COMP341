@@ -1,6 +1,7 @@
 package com.smartcampus.util;
 
 import java.util.regex.Pattern;
+import java.time.Year;
 
 /**
  * Common input-validation helpers.
@@ -100,7 +101,15 @@ public final class ValidationUtil {
         if (isBlank(staffId)) return false;
         String prefix = getStaffIdPrefix(role);
         if (prefix == null) return false;
-        return staffId.trim().toUpperCase().matches(prefix + "-\\d{4}-\\d{3}");
+        String normalized = staffId.trim().toUpperCase();
+        if (!normalized.matches(prefix + "-\\d{4}-\\d{3}")) return false;
+
+        String[] parts = normalized.split("-");
+        if (parts.length != 3) return false;
+
+        int year = parseIntOrDefault(parts[1], -1);
+        int currentYear = Year.now().getValue();
+        return year > 0 && year <= currentYear;
     }
 
     // ─── Password ─────────────────────────────────────────────

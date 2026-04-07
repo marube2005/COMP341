@@ -668,7 +668,7 @@
             <!-- Auth Tabs -->
             <div class="auth-tabs">
                 <button class="tab-btn <%= "signin".equals(activeTab) ? "active" : "" %>" onclick="switchTab('signin')">Sign In</button>
-                <button class="tab-btn <%= "signup".equals(activeTab) ? "active" : "" %>" onclick="switchTab('signup')">Create Account</button>
+                <button class="tab-btn <%= "signup".equals(activeTab) ? "active" : "" %>" onclick="switchTab('signup')">Signup</button>
             </div>
 
             <!-- Sign In Section (auth-card + demo section) -->
@@ -709,7 +709,7 @@
                 
                   <!-- Sign Up Card -->
             <div id="signupForm" class="auth-card" style="<%= "signin".equals(activeTab) ? "display:none;" : "" %>">
-                <h2>Create Account</h2>
+                <h2>Signup</h2>
                 <form id="registerForm" action="<%= ctx %>/register" method="post">
                     <div class="form-group">
                         <label for="regFullName" class="form-label"><i class="bi bi-person-fill"></i> Full Name <span class="required">*</span></label>
@@ -772,7 +772,7 @@
                         <label for="termsCheck">I agree to the <a href="#" onclick="return false;">Terms of Use</a> and <a href="#" onclick="return false;">Privacy Policy</a></label>
                     </div>
                    <button type="submit" class="btn-auth">
-                        <i class="bi bi-person-plus-fill"></i> Create Account
+                        <i class="bi bi-person-plus-fill"></i> Signup
                     </button>
                 </form>
                 <% if (registerError != null) { %>
@@ -900,20 +900,39 @@ setInterval(showNextSlide, 5000);
             return { valid: true };
         }
         function validateFloor(floorValue) {
-            const validFloors = ["basement", "groundfloor", "first", "second", "third"];
+            const floorMap = {
+                basement: "Basement",
+                "ground floor": "Ground Floor",
+                groundfloor: "Ground Floor",
+                "first floor": "First Floor",
+                first: "First Floor",
+                "second floor": "Second Floor",
+                second: "Second Floor",
+                "third floor": "Third Floor",
+                third: "Third Floor"
+            };
             const floorLower = floorValue.toString().toLowerCase().trim();
-            if (validFloors.includes(floorLower)) return { valid: true, value: floorLower };
-            if (!isNaN(floorValue) && parseInt(floorValue) >= 0 && parseInt(floorValue) <= 3) {
-                const floorMap = { 0: "groundfloor", 1: "first", 2: "second", 3: "third" };
-                return { valid: true, value: floorMap[parseInt(floorValue)] };
+            if (floorMap[floorLower]) return { valid: true, value: floorMap[floorLower] };
+            if (!isNaN(floorValue) && parseInt(floorValue, 10) >= 0 && parseInt(floorValue, 10) <= 3) {
+                const numericMap = { 0: "Ground Floor", 1: "First Floor", 2: "Second Floor", 3: "Third Floor" };
+                return { valid: true, value: numericMap[parseInt(floorValue, 10)] };
             }
-            return { valid: false, message: "Floor must be: basement, groundfloor, first, second, or third" };
+            return { valid: false, message: "Floor must be: Basement, Ground Floor, First Floor, Second Floor, or Third Floor" };
         }
         function validateStaffId(staffId, prefix) {
             const staffIdRegex = new RegExp('^' + prefix + '-\\d{4}-\\d{3}$', 'i');
             if (!staffId || !staffId.trim()) return { valid: false, message: "Staff ID is required" };
             if (!staffIdRegex.test(staffId.toUpperCase())) {
-                return { valid: false, message: 'Staff ID must follow format: ' + prefix + '-YYYY-ZZZ (e.g., ' + prefix + '-2024-001)' };
+                return { valid: false, message: 'Staff ID must follow format: ' + prefix + '-YYYY-### (e.g., ' + prefix + '-2024-001)' };
+            }
+            const upperStaffId = staffId.toUpperCase();
+            const year = parseInt(upperStaffId.split('-')[1], 10);
+            const currentYear = new Date().getFullYear();
+            if (Number.isNaN(year)) {
+                return { valid: false, message: "Year of employment must be a valid year" };
+            }
+            if (year > currentYear) {
+                return { valid: false, message: "Year of employment cannot exceed the current year (" + currentYear + ")" };
             }
             return { valid: true };
         }
@@ -941,8 +960,15 @@ setInterval(showNextSlide, 5000);
                     + '<div id="wingError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>'
                     + '<div class="form-group">'
-                    + '<label for="lecturerFloor" class="form-label"><i class="bi bi-stack"></i> Floor <span class="required">*</span></label>'
-                    + '<input type="text" name="floor" class="form-control" id="lecturerFloor" placeholder="basement, groundfloor, first, second, third">'
+                    + '<label for="lecturerFloor" class="form-label"><i class="bi bi-diagram-3"></i> Floor <span class="required">*</span></label>'
+                    + '<select name="floor" class="form-select" id="lecturerFloor" required>'
+                    + '<option value="">Select a floor</option>'
+                    + '<option value="Basement">Basement</option>'
+                    + '<option value="Ground Floor">Ground Floor</option>'
+                    + '<option value="First Floor">First Floor</option>'
+                    + '<option value="Second Floor">Second Floor</option>'
+                    + '<option value="Third Floor">Third Floor</option>'
+                    + '</select>'
                     + '<div id="floorError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>';
             } else if (role === 'janitor') {

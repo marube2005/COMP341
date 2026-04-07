@@ -166,6 +166,16 @@ public class UserDAO {
         }
     }
 
+
+    /** Permanently deletes a user by ID. */
+    public boolean delete(int userId) throws SQLException {
+        String sql = "DELETE FROM users WHERE id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, userId);
+            return ps.executeUpdate() > 0;
+        }
+    }
     /** Returns the total number of users. */
     public int count() throws SQLException {
         String sql = "SELECT COUNT(*) FROM users";

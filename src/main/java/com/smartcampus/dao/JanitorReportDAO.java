@@ -49,15 +49,16 @@ public class JanitorReportDAO {
      * @return the generated primary key
      */
     public int create(JanitorReport report) throws SQLException {
-        String sql = "INSERT INTO janitor_reports (lecturer_id, task_name, rating, reason, notes) "
-                   + "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO janitor_reports (lecturer_id, task_name, activity_name, rating, reason, notes) "
+                   + "VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setInt(1, report.getLecturerId());
             ps.setString(2, report.getTaskName());
-            ps.setInt(3, report.getRating());
-            ps.setString(4, report.getReason());
-            ps.setString(5, report.getNotes());
+            ps.setString(3, report.getActivityName());
+            ps.setInt(4, report.getRating());
+            ps.setString(5, report.getReason());
+            ps.setString(6, report.getNotes());
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) return keys.getInt(1);
@@ -84,6 +85,7 @@ public class JanitorReportDAO {
         r.setLecturerId(rs.getInt("lecturer_id"));
         r.setLecturerName(rs.getString("lecturer_name"));
         r.setTaskName(rs.getString("task_name"));
+        r.setActivityName(rs.getString("activity_name"));
         r.setRating(rs.getInt("rating"));
         r.setReason(rs.getString("reason"));
         r.setNotes(rs.getString("notes"));
