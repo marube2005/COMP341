@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 /**
  * Represents one checklist activity for a {@link CleaningTask}.
  * Activities are auto-generated when the janitor first views the task:
- * - If the lecturer of the assigned office checked in that day → all activities are listed.
+ * - If the lecturer of the assigned office checked in that day → all 4 cleaning activities are listed.
  * - Otherwise → only "Dust surfaces" is listed.
  */
 public class TaskActivity {
@@ -15,10 +15,7 @@ public class TaskActivity {
         "Sweep floor",
         "Mop floor",
         "Dust surfaces",
-        "Clean windows",
-        "Empty trash",
-        "Sanitize desk",
-        "Wipe whiteboards"
+        "Empty trash"
     };
 
     /** Minimal activity performed when the lecturer has NOT checked in. */

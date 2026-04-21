@@ -23,8 +23,8 @@ public class TaskActivityDAO {
      *
      * <p>Generation rules (applied to the task's scheduled date):
      * <ul>
-     *   <li>If the facility has an assigned lecturer who checked in on the scheduled date
-     *       → generate the full activity list (all 7 activities).</li>
+    *   <li>If the facility has an assigned lecturer who checked in on the scheduled date
+    *       → generate the full activity list (all 4 activities).</li>
      *   <li>Otherwise → generate only "Dust surfaces".</li>
      * </ul>
      */

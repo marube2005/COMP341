@@ -4,6 +4,7 @@ import com.smartcampus.dao.FacilityDAO;
 import com.smartcampus.dao.LecturerCheckinDAO;
 import com.smartcampus.model.Facility;
 import com.smartcampus.model.User;
+import com.smartcampus.util.CampusCalendarUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 
@@ -42,6 +43,13 @@ public class LecturerCheckinServlet extends HttpServlet {
         }
 
         try {
+            java.time.LocalDate today = java.time.LocalDate.now();
+            if (!CampusCalendarUtil.isWorkingDay(today)) {
+                String messageCode = CampusCalendarUtil.getPublicHolidayName(today) != null ? "holiday" : "weekend";
+                resp.sendRedirect(req.getContextPath() + "/lecturer/dashboard?checkin=" + messageCode);
+                return;
+            }
+
             Facility office = facilityDAO.findByLecturerId(user.getId());
             if (office == null) {
                 // Lecturer has no assigned office; redirect with an error indicator

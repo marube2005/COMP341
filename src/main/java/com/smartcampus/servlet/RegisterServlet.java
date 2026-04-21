@@ -1,6 +1,8 @@
 package com.smartcampus.servlet;
 
 import com.smartcampus.dao.UserDAO;
+import com.smartcampus.dao.FacilityDAO;
+import com.smartcampus.model.Facility;
 import com.smartcampus.model.User;
 import com.smartcampus.util.ValidationUtil;
 import jakarta.servlet.ServletException;
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.time.Year;
 
 /**
  * Handles new user self-registration.
@@ -21,6 +24,7 @@ public class RegisterServlet extends HttpServlet {
 
     private static final Logger LOGGER = Logger.getLogger(RegisterServlet.class.getName());
     private final UserDAO userDAO = new UserDAO();
+    private final FacilityDAO facilityDAO = new FacilityDAO();
 
     /** GET: redirect to the home/login page. */
     @Override
@@ -91,13 +95,22 @@ public class RegisterServlet extends HttpServlet {
         String officeNumber = req.getParameter("officeNumber");
         String floor       = req.getParameter("floor");
 
+        if (role == User.Role.lecturer) {
+            if (ValidationUtil.isBlank(officeNumber) || ValidationUtil.isBlank(wing) || ValidationUtil.isBlank(floor)) {
+                forward(req, resp, "Please provide the lecturer office number, wing, and floor.",
+                        name, email, phone, gender, roleStr, department);
+                return;
+            }
+        }
+
         // Validate staff ID for roles that require it
         if (role == User.Role.janitor || role == User.Role.admin || role == User.Role.supervisor) {
             if (!ValidationUtil.isValidStaffId(staffId, role.name())) {
                 String prefix = ValidationUtil.getStaffIdPrefix(role.name());
+                int currentYear = Year.now().getValue();
                 forward(req, resp,
                         "Staff ID is required and must follow the format " + prefix + "-YYYY-NNN "
-                        + "(e.g., " + prefix + "-2024-001).",
+                        + "(e.g., " + prefix + "-2024-001), where YYYY cannot be greater than " + currentYear + ".",
                         name, email, phone, gender, roleStr, department);
                 return;
             }
@@ -117,7 +130,22 @@ public class RegisterServlet extends HttpServlet {
         user.setActive(true);
 
         try {
-            userDAO.create(user, password);
+            int userId = userDAO.create(user, password);
+            user.setId(userId);
+
+            if (role == User.Role.lecturer) {
+                try {
+                    createLecturerOffice(userId, officeNumber, wing, floor);
+                } catch (SQLException officeError) {
+                    try {
+                        userDAO.delete(userId);
+                    } catch (SQLException cleanupError) {
+                        LOGGER.log(Level.WARNING, "Failed to roll back lecturer signup after office creation error", cleanupError);
+                    }
+                    throw officeError;
+                }
+            }
+
             LOGGER.log(Level.INFO, "New user registered: {0} [{1}]", new Object[]{email, role});
 
             // Flash success message in session, then redirect to login
@@ -176,5 +204,32 @@ public class RegisterServlet extends HttpServlet {
             sb.append("Floor: ").append(floor.trim());
         }
         return sb.length() > 0 ? sb.toString() : null;
+    }
+
+    private void createLecturerOffice(int lecturerId, String officeNumber, String wing, String floor) throws SQLException {
+        String officeName = officeNumber.trim().toUpperCase();
+        String officeLocation = "Wing " + wing.trim().toUpperCase();
+
+        Facility existingOffice = facilityDAO.findByNameAndLocation(officeName, officeLocation);
+        if (existingOffice != null && existingOffice.getAssignedLecturerId() != null) {
+            throw new SQLException("This office is already assigned to another lecturer.");
+        }
+
+        if (existingOffice != null) {
+            if (!facilityDAO.assignLecturer(existingOffice.getId(), lecturerId)) {
+                throw new SQLException("Failed to assign the existing office to the lecturer.");
+            }
+            return;
+        }
+
+        Facility office = new Facility();
+        office.setName(officeName);
+        office.setLocation(officeLocation);
+        office.setFacilityType(Facility.FacilityType.office);
+        office.setCapacity(1);
+        office.setStatus(Facility.Status.occupied);
+        office.setDescription("Lecturer office auto-created during signup; Floor: " + floor.trim());
+        office.setAssignedLecturerId(lecturerId);
+        facilityDAO.create(office);
     }
 }

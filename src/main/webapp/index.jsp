@@ -63,15 +63,25 @@
             --shadow-sm: 0 8px 20px -6px rgba(0, 0, 0, 0.15);
         }
 
-        body {
-            min-height: 100vh;
+       body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .auth-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            width: 100%;
             padding: 12px;
-            margin: 0;
             position: relative;
+            z-index: 3;
+            flex-direction: column;
         }
 
         .slideshow-container {
@@ -79,15 +89,12 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            z-index: 0;
-            overflow: hidden;
+            height: 100vh;
+            z-index: -2;   /* background */
         }
 
         .slide {
             position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             background-size: cover;
@@ -102,12 +109,9 @@
 
         .background-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, rgba(0, 30, 10, 0.5) 0%, rgba(0, 90, 40, 0.4) 100%);
-            z-index: 1;
+            z-index: -1;   /* overlay above image */
         }
 
         .corporate-green-bar {
@@ -178,9 +182,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            position: relative;
-            z-index: 3;
-            margin-bottom: 60px;
+            margin: auto;
+            gap: 16px;
         }
 
         .header-section {
@@ -215,6 +218,8 @@
             background: rgba(255, 255, 255, 0.2);
             border-radius: 50px;
             padding: 4px;
+            position: relative;
+            z-index: 10;
         }
 
         .tab-btn {
@@ -228,6 +233,9 @@
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
+            pointer-events: auto;
         }
 
         .tab-btn.active {
@@ -243,12 +251,15 @@
         .auth-card {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 20px 28px;
+            padding: 30px 32px;
             box-shadow: var(--shadow-sm);
             width: 100%;
+            max-width: 480px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            max-height: 75vh;
-            overflow-y: auto;
+            /* Remove inner scroll */
+            max-height: none;
+            overflow: visible;
+            transition: all 0.3s ease;
         }
 
         .auth-card::-webkit-scrollbar {
@@ -278,15 +289,14 @@
         }
 
         .form-group {
-            text-align: left;
-            margin-bottom: 14px;
+            margin-bottom: 18px;
         }
 
         .form-label {
             font-weight: 600;
             color: var(--text-dark);
-            font-size: 0.7rem;
-            margin-bottom: 4px;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
             display: flex;
             align-items: center;
             gap: 6px;
@@ -294,24 +304,28 @@
 
         .form-label i {
             color: var(--egerton-green);
-            font-size: 0.75rem;
+            font-size: 0.9rem;
         }
 
         .form-label .required {
             color: #dc3545;
-            font-size: 0.7rem;
+            font-size: 0.85rem;
         }
 
         .form-control, .form-select {
             background-color: var(--input-bg);
             border: 1.5px solid #e9ecef;
-            padding: 8px 12px;
+            padding: 12px 14px;
             border-radius: 12px;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             font-weight: 500;
             color: #1f2a3a;
             transition: all 0.2s;
             width: 100%;
+            height: auto;
+            position: relative;
+            z-index: 5;
+            pointer-events: auto;
         }
 
         .form-control:focus, .form-select:focus {
@@ -352,7 +366,7 @@
             font-weight: 700;
             font-size: 0.85rem;
             transition: all 0.2s;
-            margin-top: 8px;
+            margin-top: 12px;
             box-shadow: 0 2px 6px rgba(0, 118, 36, 0.2);
             display: flex;
             align-items: center;
@@ -414,8 +428,8 @@
 
         .role-fields-section {
             border-top: 1px dashed #e0e0e0;
-            margin-top: 8px;
-            padding-top: 12px;
+            margin-top: 14px;
+            padding-top: 14px;
         }
 
         .role-fields-title {
@@ -467,11 +481,32 @@
         }
 
         @media (max-width: 768px) {
-            .main-container { max-width: 100%; margin-bottom: 60px; }
-            .auth-card { padding: 18px 20px; max-height: 70vh; }
+            body { padding: 15px; align-items: center; }
+            .main-container { max-width: 100%; margin: 0 auto; }
+            .header-section { margin-bottom: 16px; }
+            .header-section h1 { font-size: 1.5rem; }
+            .header-section p { font-size: 0.7rem; }
+            .auth-tabs { gap: 8px; padding: 4px; margin-bottom: 16px; }
+            .tab-btn { padding: 10px 18px; font-size: 0.9rem; }
+            .auth-card { padding: 24px 26px; max-height: none; overflow-y: visible; }
+            .form-group { margin-bottom: 14px; }
+            .form-label { font-size: 0.85rem; }
+            .form-control, .form-select { padding: 12px 14px; font-size: 0.95rem; }
+            .btn-auth { padding: 12px; font-size: 0.95rem; }
+            .demo-section { padding: 12px 16px; }
+            .demo-grid { grid-template-columns: 1fr; gap: 10px; }
             .scrolling-content { font-size: 0.9rem; animation: scroll-left 40s linear infinite; }
             .scrolling-content strong { font-size: 1rem; }
             .separator { height: 20px; margin: 0 15px; }
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 12px; align-items: center; }
+            .header-section h1 { font-size: 1.4rem; }
+            .auth-card { padding: 20px 22px; border-radius: 18px; }
+            .form-label { font-size: 0.82rem; }
+            .form-control, .form-select { padding: 11px 13px; font-size: 0.92rem; }
+            .demo-item { padding: 10px 12px; }
         }
 
         @keyframes slideIn {
@@ -482,6 +517,18 @@
         @keyframes slideOut {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
+        }
+        
+        @media (max-width: 768px) {
+            .auth-card {
+                padding: 24px 20px;
+                width: 100%;
+                margin: 0 12px;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
         }
 
         .custom-toast {
@@ -611,169 +658,132 @@
     <!-- Slideshow Indicator Dots -->
     <div class="slideshow-dots" id="slideshowDots"></div>
 
-    <div class="main-container">
-        <div class="header-section">
-            <h1>SmartCampus</h1>
-            <p>Facility Management — Egerton University</p>
-        </div>
+    <div class="auth-wrapper">
+        <div class="main-container">
+            <div class="header-section">
+                <h1>SmartCampus</h1>
+                <p>Facility Management — Egerton University</p>
+            </div>
 
-        <!-- Auth Tabs -->
-        <div class="auth-tabs">
-            <button class="tab-btn <%= "signin".equals(activeTab) ? "active" : "" %>" onclick="switchTab('signin')">Sign In</button>
-            <button class="tab-btn <%= "signup".equals(activeTab) ? "active" : "" %>" onclick="switchTab('signup')">Create Account</button>
-        </div>
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button class="tab-btn <%= "signin".equals(activeTab) ? "active" : "" %>" onclick="switchTab('signin')">Sign In</button>
+                <button class="tab-btn <%= "signup".equals(activeTab) ? "active" : "" %>" onclick="switchTab('signup')">Signup</button>
+            </div>
 
-        <!-- Sign In Section (auth-card + demo section) -->
-        <div id="signinSection" style="width:100%;<%= "signup".equals(activeTab) ? "display:none;" : "" %>">
-            <div class="auth-card">
-                <h2>Welcome back</h2>
-                <form id="loginForm" action="<%= ctx %>/login" method="post">
+            <!-- Sign In Section (auth-card + demo section) -->
+            <div id="signinSection" style="width:100%;<%= "signup".equals(activeTab) ? "display:none;" : "" %>">
+                <div class="auth-card">
+                    <h2>Welcome back</h2>
+                    <form id="loginForm" action="<%= ctx %>/login" method="post">
+                        <div class="form-group">
+                            <label for="loginEmail" class="form-label"><i class="bi bi-envelope-fill"></i> Email Address <span class="required">*</span></label>
+                            <input type="email" name="email" class="form-control" id="loginEmail"
+                                   placeholder="name.role@egerton.ac.ke"
+                                   value="<%= emailValue != null ? emailValue : "" %>"
+                                   autocomplete="off" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword" class="form-label"><i class="bi bi-lock-fill"></i> Password <span class="required">*</span></label>
+                            <input type="password" name="password" class="form-control" id="loginPassword"
+                                   placeholder="Enter your password" autocomplete="off" required>
+                        </div>
+                        <button type="submit" class="btn-auth" id="signinBtn">
+                            <i class="bi bi-box-arrow-in-right"></i> Sign In
+                        </button>
+                    </form>
+                    <% if (errorMessage != null) { %>
+                    <div class="alert-custom" style="display:flex;">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <span><%= errorMessage %></span>
+                    </div>
+                    <% } %>
+                    <% if (registerSuccess != null) { %>
+                    <div class="alert-success-custom">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span><%= registerSuccess %></span>
+                    </div>
+                    <% } %>
+                </div>
+            </div>
+                
+                  <!-- Sign Up Card -->
+            <div id="signupForm" class="auth-card" style="<%= "signin".equals(activeTab) ? "display:none;" : "" %>">
+                <h2>Signup</h2>
+                <form id="registerForm" action="<%= ctx %>/register" method="post">
                     <div class="form-group">
-                        <label for="loginEmail" class="form-label"><i class="bi bi-envelope-fill"></i> Email Address <span class="required">*</span></label>
-                        <input type="email" name="email" class="form-control" id="loginEmail"
+                        <label for="regFullName" class="form-label"><i class="bi bi-person-fill"></i> Full Name <span class="required">*</span></label>
+                        <input type="text" name="name" class="form-control" id="regFullName"
+                               placeholder="e.g., Dr. John Doe"
+                               value="<%= regName %>" required autoComplete="username">
+                        <div id="nameError" class="error-message text-danger" style="display:none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="regEmail" class="form-label"><i class="bi bi-envelope-fill"></i> Email Address <span class="required">*</span></label>
+                        <input type="email" name="email" class="form-control" id="regEmail"
                                placeholder="name.role@egerton.ac.ke"
-                               value="<%= emailValue != null ? emailValue : "" %>"
-                               autocomplete="off" required>
+                               value="<%= regEmail %>" required autoComplete="email">
+                        <div id="emailError" class="error-message text-danger" style="display:none;"></div>
                     </div>
                     <div class="form-group">
-                        <label for="loginPassword" class="form-label"><i class="bi bi-lock-fill"></i> Password <span class="required">*</span></label>
-                        <input type="password" name="password" class="form-control" id="loginPassword"
-                               placeholder="Enter your password" autocomplete="off" required>
+                        <label for="regPhone" class="form-label"><i class="bi bi-telephone-fill"></i> Phone Number <span class="required">*</span></label>
+                        <input type="tel" name="phone" class="form-control" id="regPhone"
+                               placeholder="0712345678"
+                               value="<%= regPhone %>" required autoComplete="phone">
+                        <div id="phoneError" class="error-message text-danger" style="display:none;"></div>
                     </div>
-                    <button type="submit" class="btn-auth" id="signinBtn">
-                        <i class="bi bi-box-arrow-in-right"></i> Sign In
+                    <div class="form-group">
+                        <label for="regGender" class="form-label"><i class="bi bi-venus-mars"></i> Gender <span class="required">*</span></label>
+                        <select name="gender" class="form-select" id="regGender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male" <%= "Male".equals(regGender) ? "selected" : "" %>>Male</option>
+                            <option value="Female" <%= "Female".equals(regGender) ? "selected" : "" %>>Female</option>
+                            <option value="Other" <%= "Other".equals(regGender) ? "selected" : "" %>>Other</option>
+                        </select>
+                        <div id="genderError" class="error-message text-danger" style="display:none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="regRole" class="form-label"><i class="bi bi-briefcase-fill"></i> Role <span class="required">*</span></label>
+                        <select name="role" class="form-select" id="regRole" required onchange="updateRoleFields()">
+                            <option value="lecturer" <%= "lecturer".equals(regRole) ? "selected" : "" %>>Lecturer</option>
+                            <option value="janitor" <%= "janitor".equals(regRole) ? "selected" : "" %>>Janitor</option>
+                            <option value="supervisor" <%= "supervisor".equals(regRole) ? "selected" : "" %>>Supervisor</option>
+                            <option value="admin" <%= "admin".equals(regRole) ? "selected" : "" %>>Administrator</option>
+                        </select>
+                    </div>
+                    <div id="roleSpecificFields" class="role-fields-section"></div>
+                    <div class="form-group">
+                        <label for="regPassword" class="form-label"><i class="bi bi-lock-fill"></i> Password <span class="required">*</span></label>
+                        <input type="password" name="password" class="form-control" id="regPassword"
+                               placeholder="Create a strong password" required autoComplete="new-password" onkeyup="checkPasswordStrength()">
+                        <div class="password-strength">
+                            <div class="strength-bar" id="strengthBar" style="width:0%;background:#ddd;"></div>
+                            <small id="strengthText" class="text-muted"></small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="regConfirmPassword" class="form-label"><i class="bi bi-shield-lock-fill"></i> Confirm Password <span class="required">*</span></label>
+                        <input type="password" name="confirmPassword" class="form-control" id="regConfirmPassword"
+                               placeholder="Confirm your password" required autoComplete="new-password">
+                        <div id="confirmPasswordError" class="error-message text-danger" style="display:none;"></div>
+                    </div>
+                    <div class="terms-check">
+                        <input type="checkbox" id="termsCheck" required>
+                        <label for="termsCheck">I agree to the <a href="#" onclick="return false;">Terms of Use</a> and <a href="#" onclick="return false;">Privacy Policy</a></label>
+                    </div>
+                   <button type="submit" class="btn-auth">
+                        <i class="bi bi-person-plus-fill"></i> Signup
                     </button>
                 </form>
-                <% if (errorMessage != null) { %>
-                <div class="alert-custom" style="display:flex;">
+                <% if (registerError != null) { %>
+                <div class="alert-custom" style="display:flex;margin-top:10px;">
                     <i class="bi bi-exclamation-triangle-fill"></i>
-                    <span><%= errorMessage %></span>
+                    <span><%= registerError %></span>
                 </div>
                 <% } %>
-                <% if (registerSuccess != null) { %>
-                <div class="alert-success-custom">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span><%= registerSuccess %></span>
-                </div>
-                <% } %>
-            </div>
-
-            <!-- Quick Demo Access -->
-            <div class="demo-section">
-                <div class="demo-title">
-                    <i class="bi bi-stars"></i> QUICK DEMO ACCESS <i class="bi bi-stars"></i>
-                </div>
-                <div class="demo-grid">
-                    <div class="demo-item" onclick="fillDemo('admin@egerton.ac.ke','admin123')">
-                        <div class="demo-icon"><i class="bi bi-shield-lock-fill"></i></div>
-                        <div class="demo-info">
-                            <span>Administrator</span>
-                            <small>admin@egerton.ac.ke</small>
-                        </div>
-                    </div>
-                    <div class="demo-item" onclick="fillDemo('swanjiku@egerton.ac.ke','lecturer123')">
-                        <div class="demo-icon"><i class="bi bi-mortarboard-fill"></i></div>
-                        <div class="demo-info">
-                            <span>Lecturer</span>
-                            <small>swanjiku@egerton.ac.ke</small>
-                        </div>
-                    </div>
-                    <div class="demo-item" onclick="fillDemo('jkamau@egerton.ac.ke','janitor123')">
-                        <div class="demo-icon"><i class="bi bi-tools"></i></div>
-                        <div class="demo-info">
-                            <span>Janitor</span>
-                            <small>jkamau@egerton.ac.ke</small>
-                        </div>
-                    </div>
-                    <div class="demo-item" onclick="fillDemo('mchebet@egerton.ac.ke','super123')">
-                        <div class="demo-icon"><i class="bi bi-clipboard2-check-fill"></i></div>
-                        <div class="demo-info">
-                            <span>Supervisor</span>
-                            <small>mchebet@egerton.ac.ke</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="demo-hint">
-                    <i class="bi bi-info-circle-fill"></i> Click any account to auto-fill and sign in
-                </div>
-            </div>
-        </div>
-
-        <!-- Sign Up Card -->
-        <div id="signupForm" class="auth-card" style="<%= "signin".equals(activeTab) ? "display:none;" : "" %>">
-            <h2>Create Account</h2>
-            <form id="registerForm" action="<%= ctx %>/register" method="post">
-                <div class="form-group">
-                    <label for="regFullName" class="form-label"><i class="bi bi-person-fill"></i> Full Name <span class="required">*</span></label>
-                    <input type="text" name="name" class="form-control" id="regFullName"
-                           placeholder="e.g., Dr. John Doe"
-                           value="<%= regName %>" required autoComplete="username">
-                    <div id="nameError" class="error-message text-danger" style="display:none;"></div>
-                </div>
-                <div class="form-group">
-                    <label for="regEmail" class="form-label"><i class="bi bi-envelope-fill"></i> Email Address <span class="required">*</span></label>
-                    <input type="email" name="email" class="form-control" id="regEmail"
-                           placeholder="name.role@egerton.ac.ke"
-                           value="<%= regEmail %>" required autoComplete="email">
-                    <div id="emailError" class="error-message text-danger" style="display:none;"></div>
-                </div>
-                <div class="form-group">
-                    <label for="regPhone" class="form-label"><i class="bi bi-telephone-fill"></i> Phone Number <span class="required">*</span></label>
-                    <input type="tel" name="phone" class="form-control" id="regPhone"
-                           placeholder="0712345678"
-                           value="<%= regPhone %>" required autoComplete="phone">
-                    <div id="phoneError" class="error-message text-danger" style="display:none;"></div>
-                </div>
-                <div class="form-group">
-                    <label for="regGender" class="form-label"><i class="bi bi-venus-mars"></i> Gender <span class="required">*</span></label>
-                    <select name="gender" class="form-select" id="regGender" required>
-                        <option value="">Select Gender</option>
-                        <option value="Male" <%= "Male".equals(regGender) ? "selected" : "" %>>Male</option>
-                        <option value="Female" <%= "Female".equals(regGender) ? "selected" : "" %>>Female</option>
-                        <option value="Other" <%= "Other".equals(regGender) ? "selected" : "" %>>Other</option>
-                    </select>
-                    <div id="genderError" class="error-message text-danger" style="display:none;"></div>
-                </div>
-                <div class="form-group">
-                    <label for="regRole" class="form-label"><i class="bi bi-briefcase-fill"></i> Role <span class="required">*</span></label>
-                    <select name="role" class="form-select" id="regRole" required onchange="updateRoleFields()">
-                        <option value="lecturer" <%= "lecturer".equals(regRole) ? "selected" : "" %>>Lecturer</option>
-                        <option value="janitor" <%= "janitor".equals(regRole) ? "selected" : "" %>>Janitor</option>
-                        <option value="supervisor" <%= "supervisor".equals(regRole) ? "selected" : "" %>>Supervisor</option>
-                        <option value="admin" <%= "admin".equals(regRole) ? "selected" : "" %>>Administrator</option>
-                    </select>
-                </div>
-                <div id="roleSpecificFields" class="role-fields-section"></div>
-                <div class="form-group">
-                    <label for="regPassword" class="form-label"><i class="bi bi-lock-fill"></i> Password <span class="required">*</span></label>
-                    <input type="password" name="password" class="form-control" id="regPassword"
-                           placeholder="Create a strong password" required autoComplete="new-password" onkeyup="checkPasswordStrength()">
-                    <div class="password-strength">
-                        <div class="strength-bar" id="strengthBar" style="width:0%;background:#ddd;"></div>
-                        <small id="strengthText" class="text-muted"></small>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="regConfirmPassword" class="form-label"><i class="bi bi-shield-lock-fill"></i> Confirm Password <span class="required">*</span></label>
-                    <input type="password" name="confirmPassword" class="form-control" id="regConfirmPassword"
-                           placeholder="Confirm your password" required autoComplete="new-password">
-                    <div id="confirmPasswordError" class="error-message text-danger" style="display:none;"></div>
-                </div>
-                <div class="terms-check">
-                    <input type="checkbox" id="termsCheck" required>
-                    <label for="termsCheck">I agree to the <a href="#" onclick="return false;">Terms of Use</a> and <a href="#" onclick="return false;">Privacy Policy</a></label>
-                </div>
-                <button type="submit" class="btn-auth">
-                    <i class="bi bi-person-plus-fill"></i> Create Account
-                </button>
-            </form>
-            <% if (registerError != null) { %>
-            <div class="alert-custom" style="display:flex;margin-top:10px;">
-                <i class="bi bi-exclamation-triangle-fill"></i>
-                <span><%= registerError %></span>
-            </div>
-            <% } %>
-        </div>
+          </div>
+      </div>
+  </div>
 
         <div class="footer-note">
             <i class="bi bi-c-circle"></i> SmartCampus | Egerton University — Excellence Through Innovation
@@ -783,57 +793,41 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // ============= SLIDESHOW =============
-        const backgroundImages = [
-            "https://fos.egerton.ac.ke/images/faculty_of_sciences/Banner28.jpg",
-            "https://fos.egerton.ac.ke/images/faculty_of_sciences/egerton_viewhd.jpg",
-            "https://neathygiene.co.ke/images/ss7.jpeg",
-            "https://neathygiene.co.ke/images/1.jpg"
-        ];
-        const fallbackImages = [
-            "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?w=1600&h=900&fit=crop",
-            "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=1600&h=900&fit=crop",
-            "https://images.unsplash.com/photo-1562774053-701939374585?w=1600&h=900&fit=crop",
-            "https://images.unsplash.com/photo-1541829070764-84a7f30dd3f3?w=1600&h=900&fit=crop"
-        ];
-        let currentSlideIndex = 0;
-        let slideInterval;
-        let slides = [];
+        
+       const backgroundImages = [
+    "<%= ctx %>/Images/Banner28.jpg",
+    "<%= ctx %>/Images/egerton_viewhd.jpg",
+//    "<%= ctx %>/Images/ss7.jpeg",
+    "<%= ctx %>/Images/1.jpg"
+];
 
-        function createSlides() {
-            const container = document.getElementById('slideshowContainer');
-            const dotsContainer = document.getElementById('slideshowDots');
-            container.innerHTML = '';
-            dotsContainer.innerHTML = '';
-            backgroundImages.forEach((imgUrl, index) => {
-                const slide = document.createElement('div');
-                slide.className = 'slide';
-                if (index === 0) slide.classList.add('active');
-                const img = new Image();
-                img.onload = () => slide.style.backgroundImage = `url('${imgUrl}')`;
-                img.onerror = () => slide.style.backgroundImage = `url('${fallbackImages[index % fallbackImages.length]}')`;
-                img.src = imgUrl;
-                container.appendChild(slide);
-                slides.push(slide);
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                if (index === 0) dot.classList.add('active');
-                dot.addEventListener('click', () => goToSlide(index));
-                dotsContainer.appendChild(dot);
-            });
+const slideshowContainer = document.getElementById("slideshowContainer");
+let currentIndex = 0;
+let slides = [];
+
+function createSlides() {
+    backgroundImages.forEach((img, index) => {
+        const slide = document.createElement("div");
+        slide.className = "slide";
+        slide.style.backgroundImage = "url('" + img + "')";
+
+        if (index === 0) {
+            slide.classList.add("active"); // VERY IMPORTANT
         }
-        function goToSlide(index) {
-            if (index === currentSlideIndex) return;
-            slides[currentSlideIndex].classList.remove('active');
-            document.querySelectorAll('.dot')[currentSlideIndex].classList.remove('active');
-            currentSlideIndex = index;
-            slides[currentSlideIndex].classList.add('active');
-            document.querySelectorAll('.dot')[currentSlideIndex].classList.add('active');
-        }
-        function startSlideshow() {
-            if (slideInterval) clearInterval(slideInterval);
-            slideInterval = setInterval(() => goToSlide((currentSlideIndex + 1) % slides.length), 3000);
-        }
-        function initSlideshow() { createSlides(); startSlideshow(); }
+
+        slideshowContainer.appendChild(slide);
+        slides.push(slide);
+    });
+}
+
+function showNextSlide() {
+    slides[currentIndex].classList.remove("active");
+    currentIndex = (currentIndex + 1) % slides.length;
+    slides[currentIndex].classList.add("active");
+}
+
+createSlides();
+setInterval(showNextSlide, 5000);
 
         // ============= DEMO ACCOUNT AUTO-FILL =============
         function fillDemo(email, password) {
@@ -906,20 +900,39 @@
             return { valid: true };
         }
         function validateFloor(floorValue) {
-            const validFloors = ["basement", "groundfloor", "first", "second", "third"];
+            const floorMap = {
+                basement: "Basement",
+                "ground floor": "Ground Floor",
+                groundfloor: "Ground Floor",
+                "first floor": "First Floor",
+                first: "First Floor",
+                "second floor": "Second Floor",
+                second: "Second Floor",
+                "third floor": "Third Floor",
+                third: "Third Floor"
+            };
             const floorLower = floorValue.toString().toLowerCase().trim();
-            if (validFloors.includes(floorLower)) return { valid: true, value: floorLower };
-            if (!isNaN(floorValue) && parseInt(floorValue) >= 0 && parseInt(floorValue) <= 3) {
-                const floorMap = { 0: "groundfloor", 1: "first", 2: "second", 3: "third" };
-                return { valid: true, value: floorMap[parseInt(floorValue)] };
+            if (floorMap[floorLower]) return { valid: true, value: floorMap[floorLower] };
+            if (!isNaN(floorValue) && parseInt(floorValue, 10) >= 0 && parseInt(floorValue, 10) <= 3) {
+                const numericMap = { 0: "Ground Floor", 1: "First Floor", 2: "Second Floor", 3: "Third Floor" };
+                return { valid: true, value: numericMap[parseInt(floorValue, 10)] };
             }
-            return { valid: false, message: "Floor must be: basement, groundfloor, first, second, or third" };
+            return { valid: false, message: "Floor must be: Basement, Ground Floor, First Floor, Second Floor, or Third Floor" };
         }
         function validateStaffId(staffId, prefix) {
             const staffIdRegex = new RegExp('^' + prefix + '-\\d{4}-\\d{3}$', 'i');
             if (!staffId || !staffId.trim()) return { valid: false, message: "Staff ID is required" };
             if (!staffIdRegex.test(staffId.toUpperCase())) {
-                return { valid: false, message: 'Staff ID must follow format: ' + prefix + '-YYYY-ZZZ (e.g., ' + prefix + '-2024-001)' };
+                return { valid: false, message: 'Staff ID must follow format: ' + prefix + '-YYYY-### (e.g., ' + prefix + '-2024-001)' };
+            }
+            const upperStaffId = staffId.toUpperCase();
+            const year = parseInt(upperStaffId.split('-')[1], 10);
+            const currentYear = new Date().getFullYear();
+            if (Number.isNaN(year)) {
+                return { valid: false, message: "Year of employment must be a valid year" };
+            }
+            if (year > currentYear) {
+                return { valid: false, message: "Year of employment cannot exceed the current year (" + currentYear + ")" };
             }
             return { valid: true };
         }
@@ -947,8 +960,15 @@
                     + '<div id="wingError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>'
                     + '<div class="form-group">'
-                    + '<label for="lecturerFloor" class="form-label"><i class="bi bi-stack"></i> Floor <span class="required">*</span></label>'
-                    + '<input type="text" name="floor" class="form-control" id="lecturerFloor" placeholder="basement, groundfloor, first, second, third">'
+                    + '<label for="lecturerFloor" class="form-label"><i class="bi bi-diagram-3"></i> Floor <span class="required">*</span></label>'
+                    + '<select name="floor" class="form-select" id="lecturerFloor" required>'
+                    + '<option value="">Select a floor</option>'
+                    + '<option value="Basement">Basement</option>'
+                    + '<option value="Ground Floor">Ground Floor</option>'
+                    + '<option value="First Floor">First Floor</option>'
+                    + '<option value="Second Floor">Second Floor</option>'
+                    + '<option value="Third Floor">Third Floor</option>'
+                    + '</select>'
                     + '<div id="floorError" class="error-message text-danger" style="display:none;"></div>'
                     + '</div>';
             } else if (role === 'janitor') {

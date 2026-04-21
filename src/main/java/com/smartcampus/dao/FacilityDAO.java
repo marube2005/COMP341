@@ -51,14 +51,28 @@ public class FacilityDAO {
         return null;
     }
 
+    /** Finds a facility by name and location, or returns {@code null}. */
+    public Facility findByNameAndLocation(String name, String location) throws SQLException {
+        String sql = "SELECT * FROM facilities WHERE name = ? AND location = ? LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, name);
+            ps.setString(2, location);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return mapRow(rs);
+            }
+        }
+        return null;
+    }
+
     /**
      * Inserts a new facility.
      *
      * @return the generated primary key
      */
     public int create(Facility facility) throws SQLException {
-        String sql = "INSERT INTO facilities (name, location, facility_type, capacity, status, description) "
-                   + "VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO facilities (name, location, facility_type, capacity, status, description, assigned_lecturer_id) "
+                   + "VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, facility.getName());
@@ -67,6 +81,11 @@ public class FacilityDAO {
             ps.setInt(4, facility.getCapacity());
             ps.setString(5, facility.getStatus().name());
             ps.setString(6, facility.getDescription());
+            if (facility.getAssignedLecturerId() != null) {
+                ps.setInt(7, facility.getAssignedLecturerId());
+            } else {
+                ps.setNull(7, Types.INTEGER);
+            }
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) return keys.getInt(1);
@@ -88,6 +107,22 @@ public class FacilityDAO {
             ps.setString(5, facility.getStatus().name());
             ps.setString(6, facility.getDescription());
             ps.setInt(7, facility.getId());
+            return ps.executeUpdate() > 0;
+        }
+    }
+
+    /** Assigns or clears a lecturer for a facility. */
+    public boolean assignLecturer(int facilityId, Integer lecturerId) throws SQLException {
+        String sql = "UPDATE facilities SET assigned_lecturer_id=?, status=? WHERE id=?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (lecturerId != null) {
+                ps.setInt(1, lecturerId);
+            } else {
+                ps.setNull(1, Types.INTEGER);
+            }
+            ps.setString(2, lecturerId != null ? Facility.Status.occupied.name() : Facility.Status.available.name());
+            ps.setInt(3, facilityId);
             return ps.executeUpdate() > 0;
         }
     }

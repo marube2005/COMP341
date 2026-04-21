@@ -32,35 +32,38 @@
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body { min-height:100vh; display:flex; align-items:center; justify-content:center;
-               font-family:'Inter',sans-serif; padding:12px; position:relative; }
+               font-family:'Inter',sans-serif; padding:20px; position:relative; }
         .bg-wrapper { position:fixed; inset:0; z-index:0; }
         .bg-img { width:100%; height:100%; object-fit:cover; filter:brightness(0.6); }
         .bg-overlay { position:fixed; inset:0;
-                      background:linear-gradient(135deg,rgba(0,30,10,.5) 0%,rgba(0,90,40,.4) 100%);
+                      background:linear-gradient(135deg,rgba(0,30,10,.3) 0%,rgba(0,90,40,.2) 100%);
                       z-index:1; }
-        .main-container { width:100%; max-width:420px; position:relative; z-index:2; }
+        .main-container { width:100%; max-width:420px; position:relative; z-index:100; }
         .header-section { text-align:center; margin-bottom:10px; }
         .header-section h1 { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:800;
                               color:white; text-shadow:0 2px 8px rgba(0,0,0,.3); }
         .header-section p { font-size:.65rem; color:#fff9ef; background:rgba(0,0,0,.4);
                              display:inline-block; padding:2px 12px; border-radius:30px; }
-        .login-card { background:var(--card-bg); border-radius:20px; padding:20px 24px;
-                      box-shadow:0 8px 20px -6px rgba(0,0,0,.15); margin-bottom:12px; }
-        .login-card h2 { font-family:'Playfair Display',serif; font-size:1.2rem; font-weight:700;
-                          text-align:center; margin-bottom:14px;
+        .login-card { background:var(--card-bg); border-radius:20px; padding:28px 32px;
+                      box-shadow:0 8px 20px -6px rgba(0,0,0,.15); margin-bottom:12px;
+                      position: relative; z-index: 10; }
+        .login-card h2 { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700;
+                          text-align:center; margin-bottom:18px;
                           background:linear-gradient(135deg,#1e4620,#00A651);
                           background-clip:text; -webkit-background-clip:text; color:transparent; }
-        .form-group { margin-bottom:12px; }
-        .form-label { font-weight:600; color:var(--text-dark); font-size:.72rem;
-                      margin-bottom:4px; display:flex; align-items:center; gap:5px; }
-        .form-label i { color:var(--egerton-green); }
-        .form-control { background:var(--input-bg); border:1.5px solid #e9ecef; padding:7px 12px;
-                        border-radius:12px; font-size:.82rem; width:100%; height:36px; }
+        .form-group { margin-bottom:16px; }
+        .form-label { font-weight:600; color:var(--text-dark); font-size:.85rem;
+                      margin-bottom:6px; display:flex; align-items:center; gap:5px; }
+        .form-label i { color:var(--egerton-green); font-size: 0.9rem; }
+        .form-control { background:var(--input-bg); border:1.5px solid #e9ecef; padding:12px 14px;
+                        border-radius:12px; font-size:.95rem; width:100%; height:auto;
+                        position: relative; z-index: 5; pointer-events: auto; }
         .form-control:focus { background:#fff; border-color:var(--egerton-green);
                                box-shadow:0 0 0 3px rgba(0,166,81,.12); outline:none; }
         .btn-signin { background:linear-gradient(105deg,var(--egerton-green-dark),var(--egerton-green));
-                      color:white; width:100%; padding:8px; border-radius:40px; border:none;
-                      font-weight:700; font-size:.82rem; margin-top:8px; cursor:pointer; }
+                      color:white; width:100%; padding:12px; border-radius:40px; border:none;
+                      font-weight:700; font-size:.95rem; margin-top:8px; cursor:pointer;
+                      position: relative; z-index: 5; pointer-events: auto; }
         .btn-signin:hover { background:linear-gradient(105deg,#006622,#008f45); }
         .alert-error { background:rgba(248,215,218,.98); border:1px solid #f5c6cb; color:#721c24;
                        border-radius:10px; padding:8px 12px; font-size:.72rem; margin-top:10px; }
@@ -80,6 +83,21 @@
         .demo-info small { font-size:.55rem; color:#4b5563; font-family:monospace; }
         .footer-note { margin-top:8px; font-size:.55rem; color:rgba(255,255,240,.9);
                        text-align:center; }
+        @media (max-width: 768px) {
+            body { padding: 15px; align-items: center; }
+            .main-container { max-width: 100%; margin: 0 auto; }
+            .header-section h1 { font-size: 1.5rem; }
+            .login-card { padding: 24px 28px; }
+            .form-control { padding: 12px 14px; font-size: 0.95rem; height: auto; }
+            .btn-signin { padding: 12px; font-size: 0.95rem; }
+        }
+        @media (max-width: 480px) {
+            body { padding: 12px; align-items: center; }
+            .header-section h1 { font-size: 1.4rem; }
+            .login-card { padding: 20px 24px; border-radius: 18px; }
+            .form-label { font-size: 0.82rem; }
+            .form-control { padding: 11px 13px; font-size: 0.92rem; height: auto; }
+        }
     </style>
 </head>
 <body>
@@ -124,7 +142,7 @@
             <% } %>
         </div>
 
-        <div class="demo-card">
+<!--        <div class="demo-card">
             <div class="demo-title"><i class="bi bi-stars"></i> QUICK DEMO ACCESS <i class="bi bi-stars"></i></div>
             <div class="demo-grid">
                 <div class="demo-item" onclick="fillDemo('admin.admin@egerton.ac.ke','admin123')">
@@ -144,7 +162,7 @@
                     <div class="demo-info"><span>Supervisor</span><small>mchebet.supervisor@egerton.ac.ke</small></div>
                 </div>
             </div>
-        </div>
+        </div>-->
         <div class="footer-note"><i class="bi bi-c-circle"></i> SmartCampus | Egerton University</div>
     </div>
 

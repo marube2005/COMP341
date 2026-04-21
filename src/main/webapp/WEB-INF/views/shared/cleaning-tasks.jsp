@@ -26,9 +26,8 @@
     if (activitiesMap == null) activitiesMap = Collections.emptyMap();
 
     boolean isJanitor = currentUser != null && currentUser.getRole() == User.Role.janitor;
-    boolean canCreate = currentUser != null &&
-        (currentUser.getRole() == User.Role.admin || currentUser.getRole() == User.Role.supervisor);
-    boolean canDelete = currentUser != null && currentUser.getRole() == User.Role.admin;
+    boolean canCreate = currentUser != null && currentUser.getRole() == User.Role.supervisor;
+    boolean canDelete = currentUser != null && currentUser.getRole() == User.Role.supervisor;
 %>
 <!DOCTYPE html>
 <html lang="en">

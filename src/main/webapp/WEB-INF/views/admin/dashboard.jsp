@@ -212,9 +212,6 @@
         <a class="section-tab" id="tab-users" onclick="showSection('users')">
           <i class="bi bi-people"></i> Users
         </a>
-        <a class="section-tab" href="<%= ctx %>/cleaning-tasks">
-          <i class="bi bi-bucket-fill"></i> Cleaning Tasks
-        </a>
       </div>
 
       <!-- Offices Section -->
